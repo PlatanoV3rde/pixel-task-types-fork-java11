@@ -1,0 +1,4 @@
+name: PixelTaskTypes 
+version: '${version}'
+main: dev.spaxter.pixeltasktypes.PixelTaskTypes
+api-version: '1.16'
