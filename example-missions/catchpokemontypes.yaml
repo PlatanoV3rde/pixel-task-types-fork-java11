@@ -1,0 +1,20 @@
+tasks:
+  catching:
+    type: "catch_pokemon"
+    amount: 15
+    pokemon_types:
+      - bug
+      - grass
+display:
+  name: "&2&lBug Collector"
+  lore-normal:
+    - "&aCatch 15 bug or grass type Pokémon"
+  lore-started:
+    - "&e{catching:progress}/15 &6Pokémon Caught"
+rewards:
+  - "eco give {player} 10"
+options:
+  repeatable: true 
+  cooldown:
+    enabled: true
+    time: 1440

@@ -1,0 +1,17 @@
+tasks:
+  catching:
+    type: "defeat_pokemon"
+    amount: 20
+display:
+  name: "&4&lGenocide Run"
+  lore-normal:
+    - "&cDefeat 20 Pokémon"
+  lore-started:
+    - "&e{catching:progress}/20 &6Pokémon Defeated"
+rewards:
+  - "eco give {player} 10"
+options:
+  repeatable: true 
+  cooldown:
+    enabled: true
+    time: 1440

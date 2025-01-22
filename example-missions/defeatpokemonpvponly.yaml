@@ -1,0 +1,18 @@
+tasks:
+  catching:
+    type: "defeat_pokemon"
+    amount: 12
+    pvp_only: true
+display:
+  name: "&6&lPersonal Vendetta"
+  lore-normal:
+    - "&cDefeat 12 Pokémon in player versus player battles"
+  lore-started:
+    - "&e{catching:progress}/12 &6Pokémon Defeated"
+rewards:
+  - "eco give {player} 10"
+options:
+  repeatable: true 
+  cooldown:
+    enabled: true
+    time: 1440

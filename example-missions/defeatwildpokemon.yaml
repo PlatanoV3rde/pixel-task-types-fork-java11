@@ -1,0 +1,20 @@
+tasks:
+  catching:
+    type: "defeat_pokemon"
+    amount: 32
+    wild_only: true
+    pokemon_types:
+      - fire
+display:
+  name: "&2&lFirefighter"
+  lore-normal:
+    - "&cDefeat 32 fire type Pokémon in the wild"
+  lore-started:
+    - "&e{catching:progress}/32 &6Pokémon Defeated"
+rewards:
+  - "eco give {player} 10"
+options:
+  repeatable: true 
+  cooldown:
+    enabled: true
+    time: 1440

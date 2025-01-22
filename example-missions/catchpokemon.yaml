@@ -1,0 +1,17 @@
+tasks:
+  catching:
+    type: "catch_pokemon"
+    amount: 10
+display:
+  name: "&e&lAsh Catch 'em"
+  lore-normal:
+    - "&dCatch 10 Pokémon of any type"
+  lore-started:
+    - "&e{catching:progress}/10 &6Pokémon Caught"
+rewards:
+  - "eco give {player} 10"
+options:
+  repeatable: true 
+  cooldown:
+    enabled: true
+    time: 1440

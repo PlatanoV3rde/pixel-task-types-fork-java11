@@ -1,0 +1,46 @@
+tasks:
+  catching:
+    type: "catch_pokemon"
+    amount: 10
+    species:
+      - Growlithe
+      - Arcanine
+      - Snubbull
+      - Granbull
+      - Houndour
+      - Houndoom
+      - Smeargle
+      - Poochyena
+      - Mightyena
+      - Electrike
+      - Manectric
+      - Lillipup
+      - Herdier
+      - Stoutland
+      - Furfrou
+      - Rockruff
+      - Lycanroc
+      - Yamper
+      - Boltund
+      - Fidough
+      - Dachsbun
+      - Maschiff
+      - Mabosstiff
+      - Greavard
+      - Houndstone
+      - Entei
+      - Zacian
+      - Zamazenta
+display:
+  name: "&3&lDog Catcher"
+  lore-normal:
+    - "&bCatch 10 dog Pokémon"
+  lore-started:
+    - "&e{catching:progress}/10 &6Pokémon Caught"
+rewards:
+  - "eco give {player} 10"
+options:
+  repeatable: true 
+  cooldown:
+    enabled: true
+    time: 1440
