@@ -20,6 +20,8 @@ public final class PixelTaskTypes extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        logger = this.getLogger();
+        PixelTaskTypes.ART = Resources.readAsString(this.getResource("art.txt"));
 
         this.getLogger().info("\n" + PixelTaskTypes.ART);
         this.questsApi = (BukkitQuestsPlugin) this.getServer().getPluginManager().getPlugin("Quests");
