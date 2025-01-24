@@ -28,6 +28,11 @@ public class DefeatTaskType extends PixelmonTaskType {
     @SubscribeEvent
     public void onPokemonDefeat(final PixelmonKnockoutEvent event) {
         final ServerPlayerEntity player = event.source.getPlayerOwner();
+        final ServerPlayerEntity opponent = event.pokemon.getPlayerOwner();
+
+        if (player == null || opponent == null)
+            return;
+
         final Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
         final QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(player.getUUID());
 
