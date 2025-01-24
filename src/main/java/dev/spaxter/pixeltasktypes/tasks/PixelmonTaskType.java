@@ -11,6 +11,7 @@ import com.pixelmonmod.pixelmon.Pixelmon;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
 
 import dev.spaxter.pixeltasktypes.PixelTaskTypes;
+import dev.spaxter.pixeltasktypes.util.QuestHelper;
 import dev.spaxter.pixeltasktypes.validation.PixelmonTaskConfigValidator;
 import io.izzel.arclight.api.Arclight;
 
@@ -50,18 +51,28 @@ public class PixelmonTaskType extends BukkitTaskType {
             return false;
         }
 
-        PixelTaskTypes.logger.info("Checking for required types " + requiredTypes + ".");
+        // Check for required types
         if (requiredTypes != null && !this.checkType(pokemon, requiredTypes)) {
             return false;
         }
 
-        PixelTaskTypes.logger.info("Checking for required species " + requiredSpecies + ".");
+        // Check for required species
         if (requiredSpecies != null && !this.checkSpecies(pokemon, requiredSpecies)) {
             return false;
         }
 
-        PixelTaskTypes.logger.info("Checking for required palettes " + requiredPalettes + ".");
+        // Check for species to not count
+        if (notSpecies != null && this.checkSpecies(pokemon, notSpecies)) {
+            return false;
+        }
+
+        // Check for required palettes
         if (requiredPalettes != null && !this.checkPalettes(pokemon, requiredPalettes)) {
+            return false;
+        }
+
+        // Check if only legendaries should cound
+        if (legendaryOnly == true && !this.checkLegendary(pokemon)) {
             return false;
         }
 

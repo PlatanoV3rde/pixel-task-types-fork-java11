@@ -40,7 +40,7 @@ public class DefeatTaskType extends PixelmonTaskType {
 
         for (final TaskUtils.PendingTask pendingTask : TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this)) {
             Task task = pendingTask.task();
-            if ((boolean) task.getConfigValue("wild_only")) {
+            if (TaskUtils.getConfigBoolean(task, "wild_only")) {
                 continue;
             }
             if (this.checkPokemon(pokemon, task)) {
@@ -55,11 +55,11 @@ public class DefeatTaskType extends PixelmonTaskType {
         final Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
         final QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(player.getUUID());
 
-        final PixelmonEntity pokemon = event.wpp.getFaintedPokemon().entity;
+        final Pokemon pokemon = event.wpp.getFaintedPokemon().pokemon;
 
         for (final TaskUtils.PendingTask pendingTask : TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this)) {
             Task task = pendingTask.task();
-            if ((boolean) task.getConfigValue("pvp_only")) {
+            if (TaskUtils.getConfigBoolean(task, "pvp_only")) {
                 continue;
             }
             if (this.checkPokemon(pokemon, task)) {
