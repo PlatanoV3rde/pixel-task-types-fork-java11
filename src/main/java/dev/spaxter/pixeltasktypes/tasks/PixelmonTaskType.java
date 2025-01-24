@@ -99,13 +99,15 @@ public class PixelmonTaskType extends BukkitTaskType {
 
     private boolean checkSpecies(final Pokemon pokemon, final List<String> requiredSpecies) {
         String species = pokemon.getSpecies().getName().toLowerCase();
-        PixelTaskTypes.logger.info("Species checked: " + species);
         return requiredSpecies.contains(species);
     }
 
     private boolean checkPalettes(final Pokemon pokemon, final List<String> requiredPalettes) {
         String palette = pokemon.getPalette().getName().toLowerCase();
-        PixelTaskTypes.logger.info("Palette checked: " + palette);
         return requiredPalettes.contains(palette);
+    }
+
+    private boolean checkLegendary(final Pokemon pokemon) {
+        return pokemon.getSpecies().isLegendary();
     }
 }
