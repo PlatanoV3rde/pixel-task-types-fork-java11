@@ -9,7 +9,10 @@ import com.leonardobishop.quests.common.tasktype.TaskTypeManager;
 
 import dev.spaxter.pixeltasktypes.tasks.CatchTaskType;
 import dev.spaxter.pixeltasktypes.tasks.DefeatTaskType;
+import dev.spaxter.pixeltasktypes.tasks.EvolveTaskType;
+import dev.spaxter.pixeltasktypes.tasks.HatchEggTaskType;
 import dev.spaxter.pixeltasktypes.util.Resources;
+import dev.spaxter.pixeltasktypes.validation.PixelmonTaskConfigValidator;
 
 public final class PixelTaskTypes extends JavaPlugin {
 
@@ -38,6 +41,8 @@ public final class PixelTaskTypes extends JavaPlugin {
         TaskTypeManager taskTypeManager = this.questsApi.getTaskTypeManager();
         taskTypeManager.registerTaskType(new CatchTaskType(this));
         taskTypeManager.registerTaskType(new DefeatTaskType(this));
+        taskTypeManager.registerTaskType(new EvolveTaskType(this));
+        taskTypeManager.registerTaskType(new HatchEggTaskType(this));
     }
 
     public BukkitQuestsPlugin getQuestsApi() {
