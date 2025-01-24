@@ -7,7 +7,7 @@ import com.leonardobishop.quests.common.player.QPlayer;
 import com.leonardobishop.quests.common.quest.Task;
 import com.pixelmonmod.pixelmon.api.events.BeatWildPixelmonEvent;
 import com.pixelmonmod.pixelmon.api.events.PixelmonKnockoutEvent;
-import com.pixelmonmod.pixelmon.entities.pixelmon.PixelmonEntity;
+import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
 
 import dev.spaxter.pixeltasktypes.PixelTaskTypes;
 import dev.spaxter.pixeltasktypes.util.ArclightUtils;
@@ -31,7 +31,7 @@ public class DefeatTaskType extends PixelmonTaskType {
         final Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
         final QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(player.getUUID());
 
-        final PixelmonEntity pokemon = event.pokemon.entity;
+        final Pokemon pokemon = event.pokemon.pokemon;
 
         for (final TaskUtils.PendingTask pendingTask : TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this)) {
             Task task = pendingTask.task();

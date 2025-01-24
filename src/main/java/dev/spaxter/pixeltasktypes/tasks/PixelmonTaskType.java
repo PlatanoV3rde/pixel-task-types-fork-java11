@@ -8,7 +8,7 @@ import com.leonardobishop.quests.bukkit.tasktype.BukkitTaskType;
 import com.leonardobishop.quests.bukkit.util.TaskUtils;
 import com.leonardobishop.quests.common.quest.Task;
 import com.pixelmonmod.pixelmon.Pixelmon;
-import com.pixelmonmod.pixelmon.entities.pixelmon.PixelmonEntity;
+import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
 
 import dev.spaxter.pixeltasktypes.PixelTaskTypes;
 import dev.spaxter.pixeltasktypes.validation.PixelmonTaskConfigValidator;
@@ -37,10 +37,18 @@ public class PixelmonTaskType extends BukkitTaskType {
      * @param task The task to check the configuration for.
      * @return {@code true} if the Pokémon passes all checks, otherwise {@code false}
      */
-    public boolean checkPokemon(final PixelmonEntity pokemon, final Task task) {
-        final List<String> requiredTypes = TaskUtils.getConfigStringList(task, "pokemon_types");
-        final List<String> requiredSpecies = TaskUtils.getConfigStringList(task, "species");
-        final List<String> requiredPalettes = TaskUtils.getConfigStringList(task, "palettes");
+    public boolean checkPokemon(final Pokemon pokemon, final Task task) {
+        final List<String> requiredTypes = QuestHelper.getConfigStringListAsLowercase(task, "pokemon_types");
+        final List<String> requiredSpecies = QuestHelper.getConfigStringListAsLowercase(task, "species");
+        final List<String> notSpecies = QuestHelper.getConfigStringListAsLowercase(task, "not_species");
+        final List<String> requiredPalettes = QuestHelper.getConfigStringListAsLowercase(task, "palettes");
+        final boolean legendaryOnly = TaskUtils.getConfigBoolean(task, "legendary_only");
+        final Integer requiredLevel = (Integer) task.getConfigValue("pokemon_level");
+
+        // Check for required level
+        if (requiredLevel != null && pokemon.getPokemonLevel() < requiredLevel) {
+            return false;
+        }
 
         PixelTaskTypes.logger.info("Checking for required types " + requiredTypes + ".");
         if (requiredTypes != null && !this.checkType(pokemon, requiredTypes)) {
@@ -60,7 +68,7 @@ public class PixelmonTaskType extends BukkitTaskType {
         return true;
     }
 
-    private boolean checkType(final PixelmonEntity pokemon, final List<String> requiredTypes) {
+    private boolean checkType(final Pokemon pokemon, final List<String> requiredTypes) {
         List<String> types = pokemon.getForm().getTypes().stream().map((element) -> {
             return element.getName().toLowerCase();
         }).collect(Collectors.toList());
@@ -74,13 +82,13 @@ public class PixelmonTaskType extends BukkitTaskType {
         return false;
     }
 
-    private boolean checkSpecies(final PixelmonEntity pokemon, final List<String> requiredSpecies) {
+    private boolean checkSpecies(final Pokemon pokemon, final List<String> requiredSpecies) {
         String species = pokemon.getSpecies().getName().toLowerCase();
         PixelTaskTypes.logger.info("Species checked: " + species);
         return requiredSpecies.contains(species);
     }
 
-    private boolean checkPalettes(final PixelmonEntity pokemon, final List<String> requiredPalettes) {
+    private boolean checkPalettes(final Pokemon pokemon, final List<String> requiredPalettes) {
         String palette = pokemon.getPalette().getName().toLowerCase();
         PixelTaskTypes.logger.info("Palette checked: " + palette);
         return requiredPalettes.contains(palette);
