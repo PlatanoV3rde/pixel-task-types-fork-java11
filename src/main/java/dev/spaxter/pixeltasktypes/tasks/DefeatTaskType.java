@@ -18,7 +18,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class DefeatTaskType extends PixelmonTaskType {
 
     public DefeatTaskType(PixelTaskTypes plugin) {
-        super(plugin, "defeat_pokemon", "Catch a set number of Pokémon");
+        super(plugin, "defeat_pokemon", "Defeat Pokémon in battle");
 
         super.addConfigValidator(TaskUtils.useRequiredConfigValidator(this, "amount"));
         super.addConfigValidator(TaskUtils.useBooleanConfigValidator(this, "wild_only"));
