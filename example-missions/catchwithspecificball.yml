@@ -1,0 +1,19 @@
+tasks:
+  catching:
+    type: "catch_pokemon"
+    amount: 5
+    poke_balls:
+      - love_ball
+display:
+  name: "&2&lValentine's Preparations"
+  lore-normal:
+    - "&aCatch 5 Pokémon using a &dLove Ball"
+  lore-started:
+    - "&e{catching:progress}/5 &6Pokémon Caught"
+rewards:
+  - "eco give {player} 10"
+options:
+  repeatable: true 
+  cooldown:
+    enabled: true
+    time: 1440

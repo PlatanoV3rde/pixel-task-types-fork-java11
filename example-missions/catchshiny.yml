@@ -1,0 +1,19 @@
+tasks:
+  catching:
+    type: "catch_pokemon"
+    amount: 1
+    palettes:
+      - shiny
+display:
+  name: "&e&lLucky!"
+  lore-normal:
+    - "&6Catch a &eshiny &6Pokémon"
+  lore-started:
+    - "&e{catching:progress}/1 &6Pokémon Caught"
+rewards:
+  - "eco give {player} 10"
+options:
+  repeatable: true 
+  cooldown:
+    enabled: true
+    time: 1440

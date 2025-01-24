@@ -1,13 +1,13 @@
 tasks:
-  catching:
+  defeating:
     type: "defeat_pokemon"
-    amount: 20
+    amount: 50
 display:
   name: "&4&lGenocide Run"
   lore-normal:
-    - "&cDefeat 20 Pokémon"
+    - "&cDefeat 50 Pokémon"
   lore-started:
-    - "&e{catching:progress}/20 &6Pokémon Defeated"
+    - "&e{defeating:progress}/50 &6Pokémon Defeated"
 rewards:
   - "eco give {player} 10"
 options:

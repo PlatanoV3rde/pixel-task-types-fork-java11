@@ -1,0 +1,17 @@
+tasks:
+  hatching:
+    type: "hatch_egg"
+    amount: 10
+display:
+  name: "&2&lMother Goose"
+  lore-normal:
+    - "&6Hatch 10 Pokémon eggs"
+  lore-started:
+    - "&e{hatching:progress}/10 &6Eggs Hatched"
+rewards:
+  - "eco give {player} 10"
+options:
+  repeatable: true 
+  cooldown:
+    enabled: true
+    time: 1440

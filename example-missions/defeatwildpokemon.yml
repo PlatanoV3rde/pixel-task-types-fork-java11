@@ -1,5 +1,5 @@
 tasks:
-  catching:
+  defeating:
     type: "defeat_pokemon"
     amount: 32
     wild_only: true
@@ -10,7 +10,7 @@ display:
   lore-normal:
     - "&cDefeat 32 fire type Pokémon in the wild"
   lore-started:
-    - "&e{catching:progress}/32 &6Pokémon Defeated"
+    - "&e{defeating:progress}/32 &6Pokémon Defeated"
 rewards:
   - "eco give {player} 10"
 options:

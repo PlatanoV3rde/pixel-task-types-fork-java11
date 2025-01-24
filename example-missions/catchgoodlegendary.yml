@@ -1,0 +1,24 @@
+tasks:
+  catching:
+    type: "catch_pokemon"
+    amount: 1
+    legendary_only: true
+    not_species:
+      - Manaphy
+      - Phione
+      - Articuno
+      - Zapdos
+      - Moltres
+display:
+  name: "&a&lWhat a Legend"
+  lore-normal:
+    - "&dCatch a legendary Pokémon that is &c&lnot &eManaphy&d, &ePhione &dor one of the &etrio birds"
+  lore-started:
+    - "&e{catching:progress}/1 Legendary &6Pokémon Caught"
+rewards:
+  - "eco give {player} 10"
+options:
+  repeatable: true 
+  cooldown:
+    enabled: true
+    time: 1440

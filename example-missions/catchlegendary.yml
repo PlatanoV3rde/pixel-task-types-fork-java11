@@ -1,0 +1,18 @@
+tasks:
+  catching:
+    type: "catch_pokemon"
+    amount: 1
+    legendary_only: true
+display:
+  name: "&e&lProfessional Catcher"
+  lore-normal:
+    - "&dCatch a legendary Pokémon"
+  lore-started:
+    - "&e{catching:progress}/1 Legendary &6Pokémon Caught"
+rewards:
+  - "eco give {player} 10"
+options:
+  repeatable: true 
+  cooldown:
+    enabled: true
+    time: 1440

@@ -1,0 +1,19 @@
+tasks:
+  defeating:
+    type: "defeat_pokemon"
+    amount: 1
+    legendary_only: true
+    wild_only: true
+display:
+  name: "&e&lPower Trip"
+  lore-normal:
+    - "&dDefeat a wild legendary Pokémon"
+  lore-started:
+    - "&e{defeating:progress}/1 Legendary &6Pokémon Defeated"
+rewards:
+  - "eco give {player} 10"
+options:
+  repeatable: true 
+  cooldown:
+    enabled: true
+    time: 1440

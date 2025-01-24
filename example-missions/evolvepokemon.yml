@@ -1,0 +1,17 @@
+tasks:
+  evolving:
+    type: "evolve_pokemon"
+    amount: 10
+display:
+  name: "&2&lCharles Darwin"
+  lore-normal:
+    - "&6Evolve 10 Pokémon"
+  lore-started:
+    - "&e{evolving:progress}/10 &6Pokémon Evolved"
+rewards:
+  - "eco give {player} 10"
+options:
+  repeatable: true 
+  cooldown:
+    enabled: true
+    time: 1440
