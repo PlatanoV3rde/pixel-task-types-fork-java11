@@ -9,6 +9,7 @@ import com.leonardobishop.quests.common.config.ConfigProblem;
 import com.leonardobishop.quests.common.config.ConfigProblem.ConfigProblemType;
 import com.leonardobishop.quests.common.tasktype.TaskType;
 import com.pixelmonmod.pixelmon.api.pokemon.Element;
+import com.pixelmonmod.pixelmon.api.pokemon.item.pokeball.PokeBallRegistry;
 import com.pixelmonmod.pixelmon.api.registries.PixelmonPalettes;
 import com.pixelmonmod.pixelmon.api.registries.PixelmonSpecies;
 
@@ -30,6 +31,9 @@ public class PixelmonTaskConfigValidator {
      */
     private final static List<String> validSpecies = PixelmonSpecies.getAll().stream()
             .map((species) -> species.getName().toLowerCase()).collect(Collectors.toList());
+
+    public final static List<String> validPokeBalls = PokeBallRegistry.getAll().stream()
+            .map((pokeball) -> pokeball.getName().toLowerCase()).collect(Collectors.toList());
 
     /**
      * Validate Pokémon types in task configurations.
@@ -125,8 +129,47 @@ public class PixelmonTaskConfigValidator {
 
                 for (final String species : speciesNames) {
                     if (!validSpecies.contains(species.toLowerCase())) {
+                        String closestMatch = findClosestMatch(species, validSpecies);
                         ConfigProblem problem = new ConfigProblem(ConfigProblemType.ERROR,
-                                "Invalid species: " + species,
+                                "Invalid species: '" + species + "'. Did you mean: '" + closestMatch + "'?",
+                                null,
+                                path);
+                        problems.add(problem);
+                    }
+                }
+            }
+        };
+    }
+
+    /**
+     * Validate Poké ball names in task configurations.
+     *
+     * @param type Task type instance
+     * @return Validator
+     */
+    public static TaskType.ConfigValidator usePokeBallValidator(final TaskType type, final String... paths) {
+        return (config, problems) -> {
+            for (String path : paths) {
+                final Object configList = config.get(path);
+
+                if (configList == null)
+                    continue;
+
+                final List<String> pokeBalls = new ArrayList<>();
+
+                if (configList instanceof List<?> objectList) {
+                    for (Object object : objectList) {
+                        pokeBalls.add(String.valueOf(object));
+                    }
+                } else {
+                    pokeBalls.add(String.valueOf(configList));
+                }
+
+                for (final String pokeBall : pokeBalls) {
+                    if (!validPokeBalls.contains(pokeBall.toLowerCase())) {
+                        String closestMatch = findClosestMatch(pokeBall, validPokeBalls);
+                        ConfigProblem problem = new ConfigProblem(ConfigProblemType.ERROR,
+                                "Invalid Pokéball: '" + pokeBall + "'. Did you mean: '" + closestMatch + "'?",
                                 null,
                                 path);
                         problems.add(problem);
