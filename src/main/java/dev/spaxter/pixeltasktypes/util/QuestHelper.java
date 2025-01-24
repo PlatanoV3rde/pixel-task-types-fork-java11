@@ -1,10 +1,21 @@
 package dev.spaxter.pixeltasktypes.util;
 
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import com.leonardobishop.quests.bukkit.util.TaskUtils;
 import com.leonardobishop.quests.common.player.questprogressfile.TaskProgress;
 import com.leonardobishop.quests.common.quest.Task;
 
 public class QuestHelper {
+    /**
+     * Increment a numeric task progress and complete the quest if the required amount is reached.
+     * This only works for tasks with an "amount" field configured.
+     *
+     * @param pendingTask Pending task instance
+     * @return {@code true} if the quest was completed, otherwise {@code false}
+     */
     public static boolean incrementNumericProgress(final TaskUtils.PendingTask pendingTask) {
         final Task task = pendingTask.task();
         final TaskProgress progress = pendingTask.taskProgress();

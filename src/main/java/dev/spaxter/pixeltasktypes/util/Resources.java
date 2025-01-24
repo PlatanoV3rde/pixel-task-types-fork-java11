@@ -7,8 +7,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
 public class Resources {
-    public static String readAsString(InputStream resource) {
-        String result = new BufferedReader(new InputStreamReader(resource, StandardCharsets.UTF_8)).lines()
+    public static String readAsString(final InputStream resource) {
+        final String result = new BufferedReader(new InputStreamReader(resource, StandardCharsets.UTF_8)).lines()
                 .collect(Collectors.joining("\n"));
         return result;
     }

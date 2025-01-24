@@ -38,8 +38,9 @@ public class PixelmonTaskType extends BukkitTaskType {
      * Check if a Pokémon matches the configured task requirements.
      *
      * @param pokemon The pokemon entity to check.
-     * @param task The task to check the configuration for.
-     * @return {@code true} if the Pokémon passes all checks, otherwise {@code false}
+     * @param task    The task to check the configuration for.
+     * @return {@code true} if the Pokémon passes all checks, otherwise
+     *         {@code false}
      */
     public boolean checkPokemon(final Pokemon pokemon, final Task task) {
         final List<String> requiredTypes = QuestHelper.getConfigStringListAsLowercase(task, "pokemon_types");
