@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.jline.utils.Levenshtein;
+
 import com.leonardobishop.quests.common.config.ConfigProblem;
 import com.leonardobishop.quests.common.config.ConfigProblem.ConfigProblemType;
 import com.leonardobishop.quests.common.tasktype.TaskType;
@@ -62,7 +64,7 @@ public class PixelmonTaskConfigValidator {
                 for (final String typeName : typeNames) {
                     if (!validTypes.contains(typeName.toLowerCase())) {
                         ConfigProblem problem = new ConfigProblem(ConfigProblemType.ERROR,
-                                "Invalid pokémon type: " + typeName + ".\nMust be one of: " + validTypes.toString(),
+                                "Invalid pokémon type: '" + typeName + "'. Must be one of: " + validTypes.toString(),
                                 null,
                                 path);
                         problems.add(problem);
@@ -99,7 +101,7 @@ public class PixelmonTaskConfigValidator {
                 for (final String paletteName : paletteNames) {
                     if (!validPalettes.contains(paletteName.toLowerCase())) {
                         ConfigProblem problem = new ConfigProblem(ConfigProblemType.ERROR,
-                                "Invalid palette: " + paletteName + ".\nMust be one of: " + validPalettes.toString(),
+                                "Invalid palette: '" + paletteName + "'. Must be one of: " + validPalettes.toString(),
                                 null,
                                 path);
                         problems.add(problem);
@@ -109,6 +111,12 @@ public class PixelmonTaskConfigValidator {
         };
     }
 
+    /**
+     * Validate Pokémon species in task configurations.
+     *
+     * @param type Task type instance
+     * @return Validator
+     */
     public static TaskType.ConfigValidator usePokemonSpeciesValidator(final TaskType type, final String... paths) {
         return (config, problems) -> {
             for (String path : paths) {
@@ -179,4 +187,25 @@ public class PixelmonTaskConfigValidator {
         };
     }
 
+    /**
+     * Find the closest matching string from a list of strings.
+     *
+     * @param input Input string.
+     * @param candidates Possible candidates to match for.
+     * @return The closest matching string.
+     */
+    private static String findClosestMatch(final String input, final List<String> candidates) {
+        String closestMatch = null;
+        int minDistance = Integer.MAX_VALUE;
+
+        for (final String candidate : candidates) {
+            int distance = Levenshtein.distance(input, candidate);
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestMatch = candidate;
+            }
+        }
+
+        return closestMatch;
+    }
 }
