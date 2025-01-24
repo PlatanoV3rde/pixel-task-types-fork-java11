@@ -27,8 +27,11 @@ public class PixelmonTaskType extends BukkitTaskType {
         Arclight.registerForgeEvent(null, Pixelmon.EVENT_BUS, this);
 
         super.addConfigValidator(PixelmonTaskConfigValidator.usePokemonSpeciesValidator(this, "species"));
+        super.addConfigValidator(PixelmonTaskConfigValidator.usePokemonSpeciesValidator(this, "not_species"));
         super.addConfigValidator(PixelmonTaskConfigValidator.usePokemonTypesValidator(this, "pokemon_types"));
         super.addConfigValidator(PixelmonTaskConfigValidator.usePokemonPalettesValidator(this, "palettes"));
+        super.addConfigValidator(TaskUtils.useBooleanConfigValidator(this, "legendary_only"));
+        super.addConfigValidator(TaskUtils.useIntegerConfigValidator(this, "pokemon_level"));
     }
 
     /**
