@@ -34,7 +34,7 @@ public class PixelmonTaskConfigValidator {
     private final static List<String> validSpecies = PixelmonSpecies.getAll().stream()
             .map((species) -> species.getName().toLowerCase()).collect(Collectors.toList());
 
-    public final static List<String> validPokeBalls = PokeBallRegistry.getAll().stream()
+    private final static List<String> validPokeBalls = PokeBallRegistry.getAll().stream()
             .map((pokeball) -> pokeball.getName().toLowerCase()).collect(Collectors.toList());
 
     /**
