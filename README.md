@@ -5,7 +5,7 @@ With this plugin, server owners can create endless combinations of engaging and 
 ## Features
 
 - Seamless integration with Pixelmon and LMBishop's Quests
-- Support for multiple task types, including catching, defeating, evolving and hatching Pok├®mon.
+- Support for multiple task types, including catching, defeating, evolving and hatching Pokémon.
 - Highly customizable task configurations.
 - Simple installation, no additional configuration required.
 
@@ -36,7 +36,7 @@ These fields are available for all Pixelmon-related tasks.
 
 **Note**: Certain combinations can make a task impossible to complete.
 For example, setting `species` to `Pikachu` and `legendary_only` to `true` creates an invalid task,
-as Pikachu is not a legendary Pok├®mon and thus the progression criteria can never be met.
+as Pikachu is not a legendary Pokémon and thus the progression criteria can never be met.
 
 #### Required
 
@@ -44,24 +44,24 @@ as Pikachu is not a legendary Pok├®mon and thus the progression criteria can 
 
 #### Optional
 
-- `species` - List of Pok├®mon species that count toward progress.
-- `not_species` - List of Pok├®mon species that will not count toward progress.
-- `pokemon_types` - List of Pok├®mon types that count toward progress.
-- `palettes` - List of Pok├®mon palettes that count toward progress. (See the [Pixelmon Wiki](https://pixelmonmod.com/wiki/Form_indices) for available palettes.)
-- `legendary_only` - If `true`, only legendary Pok├®mon count toward progress.
-- `pokemon_level` - Minimum level required for Pok├®mon to count.
+- `species` - List of Pokémon species that count toward progress.
+- `not_species` - List of Pokémon species that will not count toward progress.
+- `pokemon_types` - List of Pokémon types that count toward progress.
+- `palettes` - List of Pokémon palettes that count toward progress. (See the [Pixelmon Wiki](https://pixelmonmod.com/wiki/Form_indices) for available palettes.)
+- `legendary_only` - If `true`, only legendary Pokémon count toward progress.
+- `pokemon_level` - Minimum level required for Pokémon to count.
 
-### Catch Pok├®mon
+### Catch Pokémon
 
-Progress is made by catching Pok├®mon with Pok├®balls.
+Progress is made by catching Pokémon with Pokéballs.
 
 #### Optional
 
-- `poke_balls` - A list of Pok├®balls that need to be used to progress the task.
+- `poke_balls` - A list of Pokéballs that need to be used to progress the task.
 
 #### Simple Example
 
-Catch 20 Pok├®mon, no additional requirements.
+Catch 20 Pokémon, no additional requirements.
 
 ```yml
 type: "catch_pokemon"
@@ -70,33 +70,33 @@ amount: 20
 
 #### Advanced Example
 
-Catch a legendary Pok├®mon using a park ball or a master ball, not counting Articuno, Zapdos, or Moltres.
+Catch a legendary Pokémon using a park ball or a master ball, not counting Articuno, Zapdos, or Moltres.
 
 ```yml
 type: "catch_pokemon"
 amount: 1
 legendary_only: true
 poke_balls:
-	- "master_ball"
-	- "park_ball"
+    - "master_ball"
+    - "park_ball"
 not_species:
-	- "articuno"
-	- "zapdos"
-	- "moltres"
+    - "articuno"
+    - "zapdos"
+    - "moltres"
 ```
 
-### Defeat Pok├®mon
+### Defeat Pokémon
 
-Progress is made by defeating Pok├®mon in battles.
+Progress is made by defeating Pokémon in battles.
 
 #### Optional
 
-- `wild_only` - If `true`, only wild Pok├®mon count.
-- `pvp_only` - If `true`, only Pok├®mon defeated in PvP battles count.
+- `wild_only` - If `true`, only wild Pokémon count.
+- `pvp_only` - If `true`, only Pokémon defeated in PvP battles count.
 
 #### Simple Example
 
-Defeat 20 Pok├®mon, either in the wild or in PvP.
+Defeat 20 Pokémon, either in the wild or in PvP.
 
 ```yml
 type: "defeat_pokemon"
@@ -105,21 +105,21 @@ amount: 20
 
 #### Advanced Example
 
-Defeat 10 Fire or Ice type Pok├®mon in the wild that are level 30 or higher.
+Defeat 10 Fire or Ice type Pokémon in the wild that are level 30 or higher.
 
 ```yml
 type: "defeat_pokemon"
 amount: 10
 wild_only: true
 pokemon_types:
-	- "fire"
-	- "ice"
+    - "fire"
+    - "ice"
 level: 30
 ```
 
-### Evolve Pok├®mon
+### Evolve Pokémon
 
-Progress is made by evolving Pok├®mon.
+Progress is made by evolving Pokémon.
 
 #### Optional
 
@@ -131,7 +131,7 @@ Progress is made by evolving Pok├®mon.
 
 #### Simple Example
 
-Evolve 5 Pok├®mon.
+Evolve 5 Pokémon.
 
 ```yml
 type: "evolve_pokemon"
@@ -140,19 +140,19 @@ amount: 5
 
 #### Advanced Example
 
-Evolve 3 Pok├®mon through leveling or trading.
+Evolve 3 Pokémon through leveling or trading.
 
 ```yml
 type: "evolve_pokemon"
 amount: 3
 evolution_types:
-	- "leveling"
-	- "trading"
+    - "leveling"
+    - "trading"
 ```
 
 ### Hatch Eggs
 
-The `hatch_egg` task type progresses the quest when players hatch Pok├®mon eggs. There are no extra fields as of now.
+The `hatch_egg` task type progresses the quest when players hatch Pokémon eggs. There are no extra fields as of now.
 
 #### Simple Example
 
@@ -171,9 +171,9 @@ Hatch a shiny Zorua or Eevee from an egg.
 type: "hatch_egg"
 amount: 1
 palettes:
-	- "shiny"
+    - "shiny"
 species:
-	- "eevee"
-	- "zorua"
+    - "eevee"
+    - "zorua"
 ```
 
