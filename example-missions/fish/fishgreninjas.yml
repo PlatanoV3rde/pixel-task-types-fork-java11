@@ -1,0 +1,21 @@
+tasks:
+  fishing:
+    type: "fish_pokemon"
+    amount: 5
+    species:
+      - Greninja
+    rods:
+      - superrod
+display:
+  name: "&1&lCroaky Catch"
+  lore-normal:
+    - "&bFish up 10 &5Greninja &busing a &6Super Rod"
+  lore-started:
+    - "&e{fishing:progress}/10 &6Greninjas Caught"
+rewards:
+  - "eco give {player} 10"
+options:
+  repeatable: true 
+  cooldown:
+    enabled: true
+    time: 1440

@@ -1,0 +1,17 @@
+tasks:
+  evolving:
+    type: "evolve_pokemon"
+    amount: 7
+display:
+  name: "&3&lEvolutionary Expert"
+  lore-normal:
+    - "&5Evolve 7 Pokémon using evolution items"
+  lore-started:
+    - "&e{evolving:progress}/7 &6Pokémon Evolved"
+rewards:
+  - "eco give {player} 10"
+options:
+  repeatable: true 
+  cooldown:
+    enabled: true
+    time: 1440

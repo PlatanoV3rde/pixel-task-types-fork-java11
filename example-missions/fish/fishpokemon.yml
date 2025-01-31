@@ -1,0 +1,17 @@
+tasks:
+  fishing:
+    type: "fish_pokemon"
+    amount: 10
+display:
+  name: "&1&lFish Fear Me"
+  lore-normal:
+    - "&bFish up 10 Pokémon"
+  lore-started:
+    - "&e{fishing:progress}/10 &6Pokémon Fished"
+rewards:
+  - "eco give {player} 10"
+options:
+  repeatable: true 
+  cooldown:
+    enabled: true
+    time: 1440
