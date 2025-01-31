@@ -1,9 +1,5 @@
 package dev.spaxter.pixeltasktypes.tasks;
 
-import java.util.List;
-
-import org.bukkit.entity.Player;
-
 import com.leonardobishop.quests.bukkit.util.TaskUtils;
 import com.leonardobishop.quests.common.player.QPlayer;
 import com.leonardobishop.quests.common.quest.Task;
@@ -14,16 +10,22 @@ import dev.spaxter.pixeltasktypes.PixelTaskTypes;
 import dev.spaxter.pixeltasktypes.util.ArclightUtils;
 import dev.spaxter.pixeltasktypes.util.QuestHelper;
 import dev.spaxter.pixeltasktypes.validation.PixelmonTaskConfigValidator;
+import dev.spaxter.pixeltasktypes.validation.ValidationConstants;
+
+import java.util.List;
+
+import org.bukkit.entity.Player;
+
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class CatchTaskType extends PixelmonTaskType {
-
     public CatchTaskType(PixelTaskTypes plugin) {
         super(plugin, "catch_pokemon", "Catch a set number of Pokémon");
 
         super.addConfigValidator(TaskUtils.useRequiredConfigValidator(this, "amount"));
-        super.addConfigValidator(PixelmonTaskConfigValidator.usePokeBallValidator(this, "poke_balls"));
+        super.addConfigValidator(
+            PixelmonTaskConfigValidator.useStringListValidator(ValidationConstants.POKE_BALLS, this, "poke_balls"));
     }
 
     @SubscribeEvent
@@ -48,5 +50,4 @@ public class CatchTaskType extends PixelmonTaskType {
             }
         }
     }
-
 }

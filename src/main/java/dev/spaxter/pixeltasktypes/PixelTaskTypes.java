@@ -12,6 +12,14 @@ import dev.spaxter.pixeltasktypes.util.Resources;
 
 import java.util.logging.Logger;
 
+import org.bukkit.plugin.java.JavaPlugin;
+
+/**
+ * Pixel Task Types main class.
+ *
+ * @author Spaxter
+ */
+public final class PixelTaskTypes extends JavaPlugin {
     public static String ART;
     public static Logger logger;
 

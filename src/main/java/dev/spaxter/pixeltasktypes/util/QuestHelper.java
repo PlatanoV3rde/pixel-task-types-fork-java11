@@ -1,13 +1,16 @@
 package dev.spaxter.pixeltasktypes.util;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import com.leonardobishop.quests.bukkit.util.TaskUtils;
 import com.leonardobishop.quests.common.player.questprogressfile.TaskProgress;
 import com.leonardobishop.quests.common.quest.Task;
 
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+/**
+ * Quest helper functions.
+ */
 public class QuestHelper {
     /**
      * Increment a numeric task progress and complete the quest if the required amount is reached.
@@ -42,7 +45,8 @@ public class QuestHelper {
     public static List<String> getConfigStringListAsLowercase(final Task task, final String path) {
         final List<String> configList = TaskUtils.getConfigStringList(task, path);
 
-        if (configList == null) return null;
+        if (configList == null)
+            return null;
 
         return configList.stream().map((value) -> value.toLowerCase()).toList();
     }

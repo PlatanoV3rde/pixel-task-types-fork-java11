@@ -1,7 +1,5 @@
 package dev.spaxter.pixeltasktypes.tasks;
 
-import org.bukkit.entity.Player;
-
 import com.leonardobishop.quests.bukkit.util.TaskUtils;
 import com.leonardobishop.quests.common.player.QPlayer;
 import com.leonardobishop.quests.common.quest.Task;
@@ -12,11 +10,13 @@ import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
 import dev.spaxter.pixeltasktypes.PixelTaskTypes;
 import dev.spaxter.pixeltasktypes.util.ArclightUtils;
 import dev.spaxter.pixeltasktypes.util.QuestHelper;
+
+import org.bukkit.entity.Player;
+
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class DefeatTaskType extends PixelmonTaskType {
-
     public DefeatTaskType(PixelTaskTypes plugin) {
         super(plugin, "defeat_pokemon", "Defeat Pokémon in battle");
 

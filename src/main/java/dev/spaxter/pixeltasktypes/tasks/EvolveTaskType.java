@@ -1,7 +1,5 @@
 package dev.spaxter.pixeltasktypes.tasks;
 
-import org.bukkit.entity.Player;
-
 import com.leonardobishop.quests.bukkit.util.TaskUtils;
 import com.leonardobishop.quests.common.player.QPlayer;
 import com.leonardobishop.quests.common.quest.Task;
