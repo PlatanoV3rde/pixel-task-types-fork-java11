@@ -1,20 +1,16 @@
 package dev.spaxter.pixeltasktypes;
 
-import java.util.logging.Logger;
-
-import org.bukkit.plugin.java.JavaPlugin;
-
 import com.leonardobishop.quests.bukkit.BukkitQuestsPlugin;
 import com.leonardobishop.quests.common.tasktype.TaskTypeManager;
 
 import dev.spaxter.pixeltasktypes.tasks.CatchTaskType;
 import dev.spaxter.pixeltasktypes.tasks.DefeatTaskType;
 import dev.spaxter.pixeltasktypes.tasks.EvolveTaskType;
+import dev.spaxter.pixeltasktypes.tasks.FishingTaskType;
 import dev.spaxter.pixeltasktypes.tasks.HatchEggTaskType;
 import dev.spaxter.pixeltasktypes.util.Resources;
-import dev.spaxter.pixeltasktypes.validation.PixelmonTaskConfigValidator;
 
-public final class PixelTaskTypes extends JavaPlugin {
+import java.util.logging.Logger;
 
     public static String ART;
     public static Logger logger;
@@ -32,17 +28,13 @@ public final class PixelTaskTypes extends JavaPlugin {
         this.registerEvents();
     }
 
-    @Override
-    public void onDisable() {
-
-    }
-
     private void registerEvents() {
         TaskTypeManager taskTypeManager = this.questsApi.getTaskTypeManager();
         taskTypeManager.registerTaskType(new CatchTaskType(this));
         taskTypeManager.registerTaskType(new DefeatTaskType(this));
         taskTypeManager.registerTaskType(new EvolveTaskType(this));
         taskTypeManager.registerTaskType(new HatchEggTaskType(this));
+        taskTypeManager.registerTaskType(new FishingTaskType(this));
     }
 
     public BukkitQuestsPlugin getQuestsApi() {
