@@ -5,11 +5,11 @@ PixelTaskTypes is a Spigot plugin developed for Arclight servers, enabling integ
 * Highly customizable task configurations.
 * Simple installation, no additional configuration required.
 ## Dependencies
-* Arclight Forge for Minecraft 1.16.5
-* Pixelmon for 1.16.5
-* LMBishop's Quests
+* [Arclight Forge](https://github.com/IzzelAliz/Arclight/releases/tag/1.16%2F1.0.25) for Minecraft 1.16.5
+* [Pixelmon for 1.16.5](https://reforged.gg/)
+* [LMBishop's Quests](https://github.com/LMBishop/Quests/releases) (minimum v3.15.2)
 ## Installation
-* Place the `PixelTaskTypes-<version>.jar` file in your Arclight server's `plugins` folder.
+* Place the `pixeltasktypes-{version}.jar` file in your Arclight server's `plugins` folder.
 * Start/Restart the server.
 * All done!
 ## Configuration
@@ -121,7 +121,7 @@ species:
 ```
 
 ### Fishing Pokémon
-Progress is made by catching Pokémon when fishing.
+Progress is made by reeling in Pokémon when fishing.
 #### Simple Example
 Catch 10 Pokémon when fishing
 ```yml
@@ -136,4 +136,27 @@ amount: 5
 rods:
     - "old_rod"
     - "good_rod"
+```
+
+### Cleaning Fossils
+Progress is made by cleaning fossils using a fossil cleaning machine.
+
+Note that because cleaning a fossil does not produce an actual Pokémon, the Pokémon requirements such as species, level, palette etc. will not work for this task type.
+
+#### Optional
+* `fossil_types` - Specify a list of fossil types that will count towards progress. (See [Fossils](https://pixelmonmod.com/wiki/Fossils) for a list of available types. The type should be specified with "Fossil" excluded)
+#### Simple Example
+Clean 10 fossils
+```yml
+type: "clean_fossils"
+amount: 10
+```
+#### Advanced Example
+Clean 5 Amber or Helix fossils
+```yml
+type: "clean_fossils"
+amount: 5
+fossil_types:
+	- "amber"
+	- "helix"
 ```

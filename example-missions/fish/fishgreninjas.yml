@@ -4,12 +4,13 @@ tasks:
     amount: 5
     species:
       - Greninja
+      - Froakie 
     rods:
       - superrod
 display:
   name: "&1&lCroaky Catch"
   lore-normal:
-    - "&bFish up 10 &5Greninja &busing a &6Super Rod"
+    - "&bFish up 10 &5Greninja &bor &5Froakie &busing a &6Super Rod"
   lore-started:
     - "&e{fishing:progress}/10 &6Greninjas Caught"
 rewards:
