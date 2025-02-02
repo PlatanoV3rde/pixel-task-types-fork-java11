@@ -4,11 +4,13 @@ import com.leonardobishop.quests.bukkit.BukkitQuestsPlugin;
 import com.leonardobishop.quests.common.tasktype.TaskTypeManager;
 
 import dev.spaxter.pixeltasktypes.tasks.CatchTaskType;
+import dev.spaxter.pixeltasktypes.tasks.CleanFossilTaskType;
 import dev.spaxter.pixeltasktypes.tasks.DefeatTaskType;
 import dev.spaxter.pixeltasktypes.tasks.EvolveTaskType;
 import dev.spaxter.pixeltasktypes.tasks.FishingTaskType;
 import dev.spaxter.pixeltasktypes.tasks.HatchEggTaskType;
 import dev.spaxter.pixeltasktypes.util.Resources;
+import dev.spaxter.pixeltasktypes.validation.ValidationConstants;
 
 import java.util.logging.Logger;
 
@@ -33,16 +35,19 @@ public final class PixelTaskTypes extends JavaPlugin {
         this.getLogger().info("\n" + PixelTaskTypes.ART);
         this.questsApi = (BukkitQuestsPlugin) this.getServer().getPluginManager().getPlugin("Quests");
 
+        logger.info(ValidationConstants.FOSSIL_TYPES.toString());
+
         this.registerEvents();
     }
 
     private void registerEvents() {
         TaskTypeManager taskTypeManager = this.questsApi.getTaskTypeManager();
         taskTypeManager.registerTaskType(new CatchTaskType(this));
+        taskTypeManager.registerTaskType(new CleanFossilTaskType(this));
         taskTypeManager.registerTaskType(new DefeatTaskType(this));
         taskTypeManager.registerTaskType(new EvolveTaskType(this));
-        taskTypeManager.registerTaskType(new HatchEggTaskType(this));
         taskTypeManager.registerTaskType(new FishingTaskType(this));
+        taskTypeManager.registerTaskType(new HatchEggTaskType(this));
     }
 
     public BukkitQuestsPlugin getQuestsApi() {
