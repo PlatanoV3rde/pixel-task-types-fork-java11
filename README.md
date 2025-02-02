@@ -157,6 +157,6 @@ Clean 5 Amber or Helix fossils
 type: "clean_fossils"
 amount: 5
 fossil_types:
-	- "amber"
-	- "helix"
+    - "amber"
+    - "helix"
 ```
