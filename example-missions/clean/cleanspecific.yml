@@ -1,0 +1,21 @@
+tasks:
+  cleaning:
+    type: "clean_fossils"
+    amount: 10
+    fossils:
+      - plume
+      - fish
+      - armor
+display:
+  name: "&2&lDeep Sea Digger"
+  lore-normal:
+    - "&bClean 10 Plume, Fish or Amber fossils"
+  lore-started:
+    - "&e{cleaning:progress}/10 &6Fossils Cleaned"
+rewards:
+  - "eco give {player} 10"
+options:
+  repeatable: true 
+  cooldown:
+    enabled: true
+    time: 1440

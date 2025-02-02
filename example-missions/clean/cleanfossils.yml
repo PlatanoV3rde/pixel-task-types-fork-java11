@@ -1,0 +1,17 @@
+tasks:
+  cleaning:
+    type: "clean_fossils"
+    amount: 20
+display:
+  name: "&7&lArcheologist"
+  lore-normal:
+    - "&6Clean 20 fossils in a fossil cleaning machine"
+  lore-started:
+    - "&e{cleaning:progress}/20 &6Fossils Cleaned"
+rewards:
+  - "eco give {player} 10"
+options:
+  repeatable: true 
+  cooldown:
+    enabled: true
+    time: 1440
