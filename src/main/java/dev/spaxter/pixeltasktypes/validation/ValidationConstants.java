@@ -5,6 +5,7 @@ import com.pixelmonmod.pixelmon.api.pokemon.item.pokeball.PokeBallRegistry;
 import com.pixelmonmod.pixelmon.api.pokemon.stats.evolution.conditions.EvoCondition;
 import com.pixelmonmod.pixelmon.api.registries.PixelmonPalettes;
 import com.pixelmonmod.pixelmon.api.registries.PixelmonSpecies;
+import com.pixelmonmod.pixelmon.enums.items.EnumFossils;
 import com.pixelmonmod.pixelmon.enums.items.EnumRodType;
 
 import java.util.Arrays;
@@ -49,4 +50,10 @@ public class ValidationConstants {
      */
     public static final List<String> ROD_TYPES =
         Arrays.stream(EnumRodType.values()).map((rodType) -> rodType.name().toLowerCase()).toList();
+
+    /**
+     * List of valid fossil types.
+     */
+    public static final List<String> FOSSIL_TYPES =
+        Arrays.stream(EnumFossils.values()).map((fossilType) -> fossilType.name().toLowerCase()).toList();
 }
