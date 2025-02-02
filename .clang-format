@@ -7,7 +7,7 @@ IndentWidth: 4
 TabWidth: 4
 UseTab: Never
 ColumnLimit: 120
-MaxEmptyLinesToKeep: 3
+MaxEmptyLinesToKeep: 1
 
 # Braces and Blocks
 BreakBeforeBraces: Attach
@@ -29,6 +29,7 @@ SpaceInEmptyParentheses: false
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
+AlignEscapedNewlines: Left
 
 # Line Breaks
 AllowAllParametersOfDeclarationOnNextLine: true
@@ -42,7 +43,7 @@ ReflowComments: true
 CommentPragmas: '^ IWYU pragma:'
 
 # Java-specific
-JavaImportGroups: ['com', 'dev', 'java', 'javax', 'org']
+JavaImportGroups: ['net', 'com', 'dev', 'io', 'java', 'javax', 'org']
 SortIncludes: true
 BreakAfterJavaFieldAnnotations: true
 
