@@ -45,8 +45,9 @@ public class QuestHelper {
     public static List<String> getConfigStringListAsLowercase(final Task task, final String path) {
         final List<String> configList = TaskUtils.getConfigStringList(task, path);
 
-        if (configList == null)
+        if (configList == null) {
             return null;
+        }
 
         return configList.stream().map((value) -> value.toLowerCase()).toList();
     }

@@ -5,7 +5,10 @@ import com.leonardobishop.quests.common.config.ConfigProblem.ConfigProblemType;
 import com.leonardobishop.quests.common.tasktype.TaskType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.jline.utils.Levenshtein;
 
@@ -44,7 +47,7 @@ public class PixelmonTaskConfigValidator {
                 }
 
                 for (final String value : values) {
-                    if (!list.contains(value)) {
+                    if (!list.contains(value.toLowerCase())) {
                         String closestMatch = findClosestMatch(value, list);
                         ConfigProblem problem = new ConfigProblem(ConfigProblemType.ERROR,
                                                                   "Invalid value for field '" + path + "': '" + value

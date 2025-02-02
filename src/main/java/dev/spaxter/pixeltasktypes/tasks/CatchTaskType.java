@@ -1,5 +1,9 @@
 package dev.spaxter.pixeltasktypes.tasks;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+
 import com.leonardobishop.quests.bukkit.util.TaskUtils;
 import com.leonardobishop.quests.common.player.QPlayer;
 import com.leonardobishop.quests.common.quest.Task;
@@ -16,9 +20,9 @@ import java.util.List;
 
 import org.bukkit.entity.Player;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-
+/**
+ * Catch Pokémon task type.
+ */
 public class CatchTaskType extends PixelmonTaskType {
     public CatchTaskType(PixelTaskTypes plugin) {
         super(plugin, "catch_pokemon", "Catch a set number of Pokémon");
@@ -28,7 +32,10 @@ public class CatchTaskType extends PixelmonTaskType {
             PixelmonTaskConfigValidator.useStringListValidator(ValidationConstants.POKE_BALLS, this, "poke_balls"));
     }
 
-    @SubscribeEvent
+    /**
+     * Runs when a Pokémon is successfully captured.
+     */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onPokemonCatch(final CaptureEvent.SuccessfulCapture event) {
         final ServerPlayerEntity player = event.getPlayer();
         final Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());

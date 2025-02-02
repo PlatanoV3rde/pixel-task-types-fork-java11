@@ -1,5 +1,9 @@
 package dev.spaxter.pixeltasktypes.tasks;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+
 import com.leonardobishop.quests.bukkit.util.TaskUtils;
 import com.leonardobishop.quests.common.player.QPlayer;
 import com.leonardobishop.quests.common.quest.Task;
@@ -17,9 +21,9 @@ import java.util.List;
 
 import org.bukkit.entity.Player;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-
+/**
+ * Pokémon fishing task type.
+ */
 public class FishingTaskType extends PixelmonTaskType {
     public FishingTaskType(PixelTaskTypes plugin) {
         super(plugin, "fish_pokemon", "Fish for Pokémon");
@@ -29,7 +33,10 @@ public class FishingTaskType extends PixelmonTaskType {
             PixelmonTaskConfigValidator.useStringListValidator(ValidationConstants.ROD_TYPES, this, "rods"));
     }
 
-    @SubscribeEvent
+    /**
+     * Runs when a Pokémon fishing rod is reeled in.
+     */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onFishingReel(final FishingEvent.Reel event) {
         final ServerPlayerEntity player = event.player;
         final Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());

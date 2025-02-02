@@ -1,5 +1,9 @@
 package dev.spaxter.pixeltasktypes.tasks;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+
 import com.leonardobishop.quests.bukkit.util.TaskUtils;
 import com.leonardobishop.quests.common.player.QPlayer;
 import com.leonardobishop.quests.common.quest.Task;
@@ -13,9 +17,9 @@ import dev.spaxter.pixeltasktypes.util.QuestHelper;
 
 import org.bukkit.entity.Player;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-
+/**
+ * Defeat Pokémon task type.
+ */
 public class DefeatTaskType extends PixelmonTaskType {
     public DefeatTaskType(PixelTaskTypes plugin) {
         super(plugin, "defeat_pokemon", "Defeat Pokémon in battle");
@@ -25,13 +29,18 @@ public class DefeatTaskType extends PixelmonTaskType {
         super.addConfigValidator(TaskUtils.useBooleanConfigValidator(this, "pvp_only"));
     }
 
-    @SubscribeEvent
+    /**
+     * Runs when a Pokémon is defeated in battle.
+     * Will exit early if one of the participants is not a player since we only care about PvP battles in this event.
+     */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onPokemonDefeat(final PixelmonKnockoutEvent event) {
         final ServerPlayerEntity player = event.source.getPlayerOwner();
         final ServerPlayerEntity opponent = event.pokemon.getPlayerOwner();
 
-        if (player == null || opponent == null)
+        if (player == null || opponent == null) {
             return;
+        }
 
         final Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
         final QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(player.getUUID());
@@ -49,7 +58,10 @@ public class DefeatTaskType extends PixelmonTaskType {
         }
     }
 
-    @SubscribeEvent
+    /**
+     * Runs when a wild Pokémon is defeated in battle.
+     */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onWildPokemonDefeat(final BeatWildPixelmonEvent event) {
         final ServerPlayerEntity player = event.player;
         final Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());

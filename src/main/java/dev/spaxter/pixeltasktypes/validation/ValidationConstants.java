@@ -33,7 +33,7 @@ public class ValidationConstants {
         PixelmonSpecies.getAll().stream().map((species) -> species.getName().toLowerCase()).toList();
 
     /**
-     * List of valid Pokéball names.
+     * List of valid Pokeball names.
      */
     public static final List<String> POKE_BALLS =
         PokeBallRegistry.getAll().stream().map((pokeball) -> pokeball.getName().toLowerCase()).toList();

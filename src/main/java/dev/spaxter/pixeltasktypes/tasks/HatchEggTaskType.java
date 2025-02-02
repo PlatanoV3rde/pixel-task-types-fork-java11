@@ -1,5 +1,9 @@
 package dev.spaxter.pixeltasktypes.tasks;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+
 import com.leonardobishop.quests.bukkit.util.TaskUtils;
 import com.leonardobishop.quests.common.player.QPlayer;
 import com.leonardobishop.quests.common.quest.Task;
@@ -12,9 +16,9 @@ import dev.spaxter.pixeltasktypes.util.QuestHelper;
 
 import org.bukkit.entity.Player;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-
+/**
+ * Hatch Pokémon eggs task type.
+ */
 public class HatchEggTaskType extends PixelmonTaskType {
     public HatchEggTaskType(PixelTaskTypes plugin) {
         super(plugin, "hatch_egg", "Hatch Pokémon eggs");
@@ -22,7 +26,10 @@ public class HatchEggTaskType extends PixelmonTaskType {
         super.addConfigValidator(TaskUtils.useRequiredConfigValidator(this, "amount"));
     }
 
-    @SubscribeEvent
+    /**
+     * Runs after a Pokémon egg is hatched.
+     */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onEggHatch(final EggHatchEvent.Post event) {
         final ServerPlayerEntity player = event.getPlayer();
         final Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());

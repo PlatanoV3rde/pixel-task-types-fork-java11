@@ -13,10 +13,10 @@ import dev.spaxter.pixeltasktypes.util.QuestHelper;
 import dev.spaxter.pixeltasktypes.validation.PixelmonTaskConfigValidator;
 import dev.spaxter.pixeltasktypes.validation.ValidationConstants;
 
+import io.izzel.arclight.api.Arclight;
+
 import java.util.List;
 import java.util.stream.Collectors;
-
-import io.izzel.arclight.api.Arclight;
 
 /**
  * Custom {@link TaskType} for Pixelmon based tasks.

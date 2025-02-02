@@ -1,5 +1,9 @@
 package dev.spaxter.pixeltasktypes.tasks;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+
 import com.leonardobishop.quests.bukkit.util.TaskUtils;
 import com.leonardobishop.quests.common.player.QPlayer;
 import com.leonardobishop.quests.common.quest.Task;
@@ -14,9 +18,9 @@ import java.util.List;
 
 import org.bukkit.entity.Player;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-
+/**
+ * Clean fossil task type.
+ */
 public class CleanFossilTaskType extends PixelmonTaskType {
     public CleanFossilTaskType(PixelTaskTypes plugin) {
         super(plugin, "clean_fossils", "Clean fossils in a fossil machine");
@@ -24,7 +28,10 @@ public class CleanFossilTaskType extends PixelmonTaskType {
         super.addConfigValidator(TaskUtils.useRequiredConfigValidator(this, "amount"));
     }
 
-    @SubscribeEvent
+    /**
+     * Runs when a fossil is obtained from the cleaning machine.
+     */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onFossilClean(final FossilCleanerEvent.ObtainingCleanFossil event) {
         final ServerPlayerEntity player = event.getPlayer();
         final Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
@@ -37,7 +44,7 @@ public class CleanFossilTaskType extends PixelmonTaskType {
                 final Task task = pendingTask.task();
                 final List<String> requiredFossilTypes = QuestHelper.getConfigStringListAsLowercase(task, "fossils");
 
-                if (requiredFossilTypes != null && requiredFossilTypes.contains(fossilType)) {
+                if (requiredFossilTypes != null && !requiredFossilTypes.contains(fossilType)) {
                     continue;
                 }
                 QuestHelper.incrementNumericProgress(pendingTask);

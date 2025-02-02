@@ -1,5 +1,9 @@
 package dev.spaxter.pixeltasktypes.tasks;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+
 import com.leonardobishop.quests.bukkit.util.TaskUtils;
 import com.leonardobishop.quests.common.player.QPlayer;
 import com.leonardobishop.quests.common.quest.Task;
@@ -16,9 +20,9 @@ import java.util.List;
 
 import org.bukkit.entity.Player;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-
+/**
+ * Evolve Pokémon task type.
+ */
 public class EvolveTaskType extends PixelmonTaskType {
     public EvolveTaskType(PixelTaskTypes plugin) {
         super(plugin, "evolve_pokemon", "Evolve Pokémon");
@@ -28,7 +32,10 @@ public class EvolveTaskType extends PixelmonTaskType {
             ValidationConstants.EVOLUTION_TYPES, this, "evolution_types"));
     }
 
-    @SubscribeEvent
+    /**
+     * Runs when a Pokémon evolves.
+     */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onEvolve(final EvolveEvent.Post event) {
         final ServerPlayerEntity player = event.getPlayer();
         final Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
