@@ -4,13 +4,12 @@ plugins {
     id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
 }
 
-
 group = 'dev.spaxter'
-version = '1.0-beta'
+version = '1.0'
 
 repositories {
     mavenCentral()
-    maven { 
+    maven {
         url = 'https://maven.izzel.io/releases'
     }
     maven {
@@ -51,7 +50,6 @@ minecraft {
         }
     }
 }
-
 
 dependencies {
     minecraft "net.minecraftforge:forge:1.16.5-36.2.34"
