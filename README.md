@@ -133,6 +133,8 @@ Catch 5 Magikarp using an old rod or a good rod
 ```yml
 type: "fish_pokemon"
 amount: 5
+species:
+    - "magikarp"
 rods:
     - "old_rod"
     - "good_rod"
