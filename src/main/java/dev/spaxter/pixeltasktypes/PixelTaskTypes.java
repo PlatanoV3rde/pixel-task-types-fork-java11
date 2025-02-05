@@ -10,7 +10,6 @@ import dev.spaxter.pixeltasktypes.tasks.EvolveTaskType;
 import dev.spaxter.pixeltasktypes.tasks.FishingTaskType;
 import dev.spaxter.pixeltasktypes.tasks.HatchEggTaskType;
 import dev.spaxter.pixeltasktypes.util.Resources;
-import dev.spaxter.pixeltasktypes.validation.ValidationConstants;
 
 import java.util.logging.Logger;
 
@@ -32,10 +31,15 @@ public final class PixelTaskTypes extends JavaPlugin {
         logger = this.getLogger();
         PixelTaskTypes.ART = Resources.readAsString(this.getResource("art.txt"));
 
+        if (!this.checkArclight()) {
+            logger.warning("This server does not seem to be running Arclight Forge. PixelTaskTypes will most likely not work.");
+        }
+        if (!this.checkPixelmon()) {
+            logger.warning("This server does not seem to have the Pixelmon Mod installed. PixelTaskTypes will not work without it.");
+        }
+
         this.getLogger().info("\n" + PixelTaskTypes.ART);
         this.questsApi = (BukkitQuestsPlugin) this.getServer().getPluginManager().getPlugin("Quests");
-
-        logger.info(ValidationConstants.FOSSIL_TYPES.toString());
 
         this.registerEvents();
     }
@@ -52,5 +56,23 @@ public final class PixelTaskTypes extends JavaPlugin {
 
     public BukkitQuestsPlugin getQuestsApi() {
         return this.questsApi;
+    }
+
+    private boolean checkArclight() {
+        try {
+            Class.forName("net.minecraftforge.common.MinecraftForge");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
+    private boolean checkPixelmon() {
+        try {
+            Class.forName("com.pixelmonmod.pixelmon.Pixelmon");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 }
