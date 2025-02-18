@@ -82,9 +82,9 @@ Progress is made by evolving Pokémon.
 #### Optional
 * `evolution_types` - Specify required evolution methods. Options:
     * `leveling` - Evolve through leveling up.
-    * `interaction` - Evolve via items (e.g., Leaf Stone).
-    * `tick` - Passive evolution (e.g., happiness or time-based).
-    * `trading` - Evolve through trading.
+    * `interact` - Evolve via items (e.g., Leaf Stone).
+    * `ticking` - *Honestly no idea, haven't found a pokémon that uses this yet*
+    * `trade` - Evolve through trading.
 #### Simple Example
 Evolve 5 Pokémon.
 ```yml
@@ -161,4 +161,23 @@ amount: 5
 fossil_types:
     - "amber"
     - "helix"
+```
+
+### Using Moves
+Progress is made by using moves in battle.
+#### Optional
+* `moves` - Specify a list of moves that will count towards progress.
+#### Simple Example
+Use 10 moves in battle
+```yml
+type: "use_moves"
+amount: 10
+```
+#### Advanced Example
+Use sucker punch 15 times
+```yml
+type: "use_moves"
+amount: 15
+moves:
+    - "sucker_punch"
 ```
