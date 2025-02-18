@@ -55,7 +55,7 @@ public class FishingTaskType extends PixelmonTaskType {
                 final String rodType = event.getRodType().name().toLowerCase();
                 final List<String> requiredRodTypes = QuestHelper.getConfigStringListAsLowercase(task, "rods");
 
-                if (requiredRodTypes != null && requiredRodTypes.contains(rodType)) {
+                if (requiredRodTypes != null && !requiredRodTypes.contains(rodType)) {
                     continue;
                 }
 
