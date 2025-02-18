@@ -7,7 +7,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import com.leonardobishop.quests.bukkit.util.TaskUtils;
 import com.leonardobishop.quests.common.player.QPlayer;
 import com.leonardobishop.quests.common.quest.Task;
-import com.pixelmonmod.pixelmon.api.events.EvolveEvent;
+import com.pixelmonmod.pixelmon.api.events.battles.AttackEvent;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
 
 import dev.spaxter.pixeltasktypes.PixelTaskTypes;
@@ -21,35 +21,39 @@ import java.util.List;
 import org.bukkit.entity.Player;
 
 /**
- * Evolve Pokémon task type.
+ * Hatch Pokémon eggs task type.
  */
-public class EvolveTaskType extends PixelmonTaskType {
-    public EvolveTaskType(PixelTaskTypes plugin) {
-        super(plugin, "evolve_pokemon", "Evolve Pokémon");
+public class MoveTaskType extends PixelmonTaskType {
+    public MoveTaskType(PixelTaskTypes plugin) {
+        super(plugin, "use_moves", "Use Pokémon moves in battle");
 
         super.addConfigValidator(TaskUtils.useRequiredConfigValidator(this, "amount"));
-        super.addConfigValidator(PixelmonTaskConfigValidator.useStringListValidator(
-            ValidationConstants.EVOLUTION_TYPES, this, "evolution_types"));
+        super.addConfigValidator(
+            PixelmonTaskConfigValidator.useStringListValidator(ValidationConstants.MOVE_NAMES, this, "moves"));
     }
 
     /**
-     * Runs when a Pokémon evolves.
+     * Runs after a Pokémon egg is hatched.
      */
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void onEvolve(final EvolveEvent.Post event) {
-        final ServerPlayerEntity player = event.getPlayer();
+    public void onUseMove(final AttackEvent.Use event) {
+        final ServerPlayerEntity player = event.user.getPlayerOwner();
+
+        if (player == null) {
+            return;
+        }
+
         final Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
         final QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(player.getUUID());
+        final Pokemon pokemon = event.target.pokemon;
 
-        String evolutionType = event.getEvolution().evoType;
-        Pokemon pokemon = event.getPokemon();
+        final String attackName = event.attack.getAttackName().toLowerCase();
 
         for (final TaskUtils.PendingTask pendingTask : TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this)) {
             final Task task = pendingTask.task();
+            final List<String> requiredAttacks = QuestHelper.getConfigStringListAsLowercase(task, "moves");
 
-            List<String> requiredEvolutionTypes = QuestHelper.getConfigStringListAsLowercase(task, "evolution_types");
-
-            if (requiredEvolutionTypes != null && !requiredEvolutionTypes.contains(evolutionType)) {
+            if (requiredAttacks != null && !requiredAttacks.contains(attackName)) {
                 continue;
             }
 

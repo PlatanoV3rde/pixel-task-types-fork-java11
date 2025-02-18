@@ -75,4 +75,14 @@ public class ValidationConstants {
                                                         .filter(value -> value != null)
                                                         .map((fossilType) -> fossilType.name().toLowerCase())
                                                         .toList();
+
+    /**
+     * List of valid move names.
+     */
+    public static final List<String> MOVE_NAMES =
+        AttackRegistry.getAllAttackNames()
+            .stream()
+            .filter(value -> value != null)
+            .map((attackName) -> attackName.toLowerCase().replaceAll(" ", "_"))
+            .toList();
 }

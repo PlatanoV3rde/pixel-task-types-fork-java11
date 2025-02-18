@@ -9,7 +9,9 @@ import dev.spaxter.pixeltasktypes.tasks.DefeatTaskType;
 import dev.spaxter.pixeltasktypes.tasks.EvolveTaskType;
 import dev.spaxter.pixeltasktypes.tasks.FishingTaskType;
 import dev.spaxter.pixeltasktypes.tasks.HatchEggTaskType;
+import dev.spaxter.pixeltasktypes.tasks.MoveTaskType;
 import dev.spaxter.pixeltasktypes.util.Resources;
+import dev.spaxter.pixeltasktypes.validation.ValidationConstants;
 
 import java.util.logging.Logger;
 
@@ -32,10 +34,12 @@ public final class PixelTaskTypes extends JavaPlugin {
         PixelTaskTypes.ART = Resources.readAsString(this.getResource("art.txt"));
 
         if (!this.checkArclight()) {
-            logger.warning("This server does not seem to be running Arclight Forge. PixelTaskTypes will most likely not work.");
+            logger.warning(
+                "This server does not seem to be running Arclight Forge. PixelTaskTypes will most likely not work.");
         }
         if (!this.checkPixelmon()) {
-            logger.warning("This server does not seem to have the Pixelmon Mod installed. PixelTaskTypes will not work without it.");
+            logger.warning(
+                "This server does not seem to have the Pixelmon Mod installed. PixelTaskTypes will not work without it.");
         }
 
         this.getLogger().info("\n" + PixelTaskTypes.ART);
@@ -52,6 +56,7 @@ public final class PixelTaskTypes extends JavaPlugin {
         taskTypeManager.registerTaskType(new EvolveTaskType(this));
         taskTypeManager.registerTaskType(new FishingTaskType(this));
         taskTypeManager.registerTaskType(new HatchEggTaskType(this));
+        taskTypeManager.registerTaskType(new MoveTaskType(this));
     }
 
     public BukkitQuestsPlugin getQuestsApi() {
