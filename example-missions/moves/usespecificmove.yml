@@ -1,0 +1,19 @@
+tasks:
+  moves:
+    type: "use_moves"
+    amount: 10
+    moves:
+      - "splash"
+display:
+  name: "&b&lSplash"
+  lore-normal:
+    - "&2Use the move &bSplash &210 times"
+  lore-started:
+    - "&e{moves:progress}/10 &6Splashes Used"
+rewards:
+  - "eco give {player} 10"
+options:
+  repeatable: true 
+  cooldown:
+    enabled: true
+    time: 1440

@@ -1,0 +1,17 @@
+tasks:
+  moves:
+    type: "use_moves"
+    amount: 30
+display:
+  name: "&e&lSparring"
+  lore-normal:
+    - "&6Use any move in battle 30 times"
+  lore-started:
+    - "&e{moves:progress}/30 &6Moves Used"
+rewards:
+  - "eco give {player} 10"
+options:
+  repeatable: true 
+  cooldown:
+    enabled: true
+    time: 1440

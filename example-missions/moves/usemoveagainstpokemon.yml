@@ -1,0 +1,23 @@
+tasks:
+  moves:
+    type: "use_moves"
+    amount: 20
+    types:
+      - "fire"
+    moves:
+      - "flamethrower"
+      - "flare_blitz"
+      - "fire_punch"
+display:
+  name: "&6&lFight fire with Fire"
+  lore-normal:
+    - "&4Use &cFlamethrower, Flare Blitz or Fire Punch &4against a fire type Pokémon 20 times"
+  lore-started:
+    - "&e{moves:progress}/20 &6Moves Used"
+rewards:
+  - "eco give {player} 10"
+options:
+  repeatable: true 
+  cooldown:
+    enabled: true
+    time: 1440
