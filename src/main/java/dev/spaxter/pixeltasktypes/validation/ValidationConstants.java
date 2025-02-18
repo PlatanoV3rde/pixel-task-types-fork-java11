@@ -1,10 +1,14 @@
 package dev.spaxter.pixeltasktypes.validation;
 
+import com.pixelmonmod.pixelmon.api.battles.attack.AttackRegistry;
+import com.pixelmonmod.pixelmon.api.events.EvolveEvent;
 import com.pixelmonmod.pixelmon.api.pokemon.Element;
 import com.pixelmonmod.pixelmon.api.pokemon.item.pokeball.PokeBallRegistry;
+import com.pixelmonmod.pixelmon.api.pokemon.stats.evolution.Evolution;
 import com.pixelmonmod.pixelmon.api.pokemon.stats.evolution.conditions.EvoCondition;
 import com.pixelmonmod.pixelmon.api.registries.PixelmonPalettes;
 import com.pixelmonmod.pixelmon.api.registries.PixelmonSpecies;
+import com.pixelmonmod.pixelmon.entities.pixelmon.helpers.EvolutionQueryList;
 import com.pixelmonmod.pixelmon.enums.items.EnumFossils;
 import com.pixelmonmod.pixelmon.enums.items.EnumRodType;
 
@@ -54,14 +58,14 @@ public class ValidationConstants {
     /**
      * List of valid evolution types.
      */
-    public static final List<String> EVOLUTION_TYPES = EvoCondition.evoConditionTypes.keySet()
+    public static final List<String> EVOLUTION_TYPES = Evolution.evolutionTypes.keySet()
                                                            .stream()
                                                            .filter(value -> value != null)
                                                            .map((evolutionType) -> evolutionType.toLowerCase())
                                                            .toList();
 
     /**
-     * List of valid evolution types.
+     * List of valid fishing rod types.
      */
     public static final List<String> ROD_TYPES = Arrays.stream(EnumRodType.values())
                                                      .filter(value -> value != null)
