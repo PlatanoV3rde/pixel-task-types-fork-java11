@@ -24,7 +24,6 @@ import proguard.gradle.ProGuardTask
 group = 'dev.spaxter'
 version = '1.0'
 
-// Configuración específica para Java 11
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(11)
@@ -38,6 +37,7 @@ configurations {
         canBeResolved = true
         canBeConsumed = false
     }
+    pixelmonDownload // Configuración para descargar Pixelmon
 }
 
 repositories {
@@ -80,25 +80,27 @@ minecraft {
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.2.34'
-    
-    // Dependencias principales usando JARs locales
+
+    // JARs locales
     implementation files('libs/Quests.jar')
     implementation files('libs/Pixelmon-1.16.5-9.1.12-server.jar')
-    
+
     // Otras dependencias
     compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
     compileOnly 'io.izzel.arclight:arclight-forge-1.16:1.0.25:spigot'
+
+    // Pixelmon para descarga automática
+    pixelmonDownload 'com.pixelmonmod:pixelmon:1.16.5-9.1.12-server'
 }
 
 tasks.register('proguard', ProGuardTask) {
     dependsOn jar
     injars jar.archiveFile
     outjars "${buildDir}/libs/${base.archivesName.get()}-${version}-obfuscated.jar"
-    
-    // Configuración de ProGuard
+
     libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod"
     libraryjars configurations.runtimeClasspath
-    
+
     configuration file('proguard.pro')
     printmapping "${buildDir}/proguard/mapping.txt"
 }
@@ -132,4 +134,24 @@ jar {
     }
 }
 
-tasks.build.dependsOn tasks.proguard
+// Tarea para descargar Pixelmon y guardarlo en libs
+def pixelmonJar = 'Pixelmon-1.16.5-9.1.12-server.jar'
+
+tasks.register('downloadPixelmonJar', Copy) {
+    dependsOn configurations.pixelmonDownload
+    from {
+        configurations.pixelmonDownload.resolve()
+    }
+    into 'libs'
+    rename { pixelmonJar }
+
+    doFirst {
+        println "Descargando Pixelmon..."
+    }
+    doLast {
+        println "Pixelmon guardado en libs/${pixelmonJar}"
+    }
+}
+
+// Hacer que la tarea build dependa de la descarga de Pixelmon
+tasks.build.dependsOn tasks.downloadPixelmonJar
