@@ -1,9 +1,11 @@
 buildscript {
     repositories {
         mavenCentral()
+        maven { url 'https://plugins.gradle.org/m2/' }
     }
     dependencies {
         classpath 'com.guardsquare:proguard-gradle:7.6.1'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:6.0.16'
     }
 }
 
@@ -14,18 +16,22 @@ plugins {
     id 'net.kyori.blossom' version '1.3.1'
 }
 
-def mod_id = 'mimodid' // <-- Cambia esto por el ID real de tu mod
-def mapping_channel = 'official'
-def mapping_version = '1.16.5'
-
 base {
     archivesName = mod_id
 }
 
 import proguard.gradle.ProGuardTask
-
 group = 'dev.spaxter'
 version = '1.0'
+
+// Configuración específica para Java 11
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
 
 configurations {
     proguardConfig {
@@ -37,40 +43,34 @@ configurations {
 repositories {
     mavenCentral()
     mavenLocal()
-    maven { url = 'https://maven.izzel.io/releases' }
-    maven {
-        name = "spigotmc-repo"
-        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
-    }
-    maven {
-        name = "sonatype"
-        url = "https://oss.sonatype.org/content/groups/public/"
-    }
-    flatDir {
-        dirs "libs"
-    }
+    maven { url 'https://maven.izzel.io/releases' }
+    maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+    maven { url 'https://oss.sonatype.org/content/groups/public/' }
+    maven { url 'https://repo.repsy.io/mvn/pixelmon-repo/releases' } // Nuevo repo para Pixelmon
+    maven { url 'https://repo.codemc.io/repository/maven-public/' } // Para Quests
+    maven { url 'https://maven.minecraftforge.net/' }
+    flatDir { dirs "libs" }
 }
 
 minecraft {
     mappings channel: mapping_channel, version: mapping_version
     copyIdeResources = true
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     runs {
         configureEach {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
+            jvmArgs '-Dmixin.env.disableRefMap=true'
             mods {
                 "${mod_id}" {
                     source sourceSets.main
                 }
             }
         }
-
         client {}
-        server {
-            args '--nogui'
-        }
+        server { args '--nogui' }
         data {
             workingDirectory project.file('run-data')
             args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
@@ -79,38 +79,30 @@ minecraft {
 }
 
 dependencies {
-    // Dependencia principal de Forge
-    minecraft "net.minecraftforge:forge:1.16.5-36.2.34"
-
-    // Librerías solo para compilación (no incluidas en el runtime)
-    compileOnly 'com.pixelmonmod.api:Pixelmon:1.16.5-9.1.12-universal'
-    compileOnly "org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT"
+    minecraft 'net.minecraftforge:forge:1.16.5-36.2.34'
+    
+    // Dependencias corregidas
+    implementation fg.deobf('com.pixelmonmod:pixelmon:1.16.5-9.1.12-server') // Versión correcta
+    compileOnly 'com.leonardobishop.quests:quests-bukkit:3.15.2' // Versión correcta
+    compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
     compileOnly 'io.izzel.arclight:arclight-forge-1.16:1.0.25:spigot'
-    compileOnly 'com.leonardobishop:Quests:3.15.2'
-}
-
-def targetJavaVersion = 11
-java {
-    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
-    if (JavaVersion.current() < javaVersion) {
-        toolchain.languageVersion.set(JavaLanguageVersion.of(targetJavaVersion))
-    }
+    
+    // Si las dependencias no se resuelven, usa JARs locales
+    // implementation files('libs/Pixelmon-1.16.5-9.1.12-server.jar')
+    // implementation files('libs/Quests-3.15.2.jar')
 }
 
 tasks.register('proguard', ProGuardTask) {
     dependsOn jar
-
-    injars file("${buildDir}/libs/${project.name}-${project.version}.jar")
-    outjars file("${buildDir}/libs/${project.name}-obfuscated.jar")
-
-    libraryjars files(System.getProperty("java.home") + "/jmods/")
-    libraryjars files("./libs")
-
+    injars jar.archiveFile
+    outjars "${buildDir}/libs/${base.archivesName.get()}-${version}-obfuscated.jar"
+    
+    // Configuración de ProGuard
+    libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod"
+    libraryjars configurations.runtimeClasspath
+    
     configuration file('proguard.pro')
-
-    printmapping file("${buildDir}/proguard/mapping.txt")
+    printmapping "${buildDir}/proguard/mapping.txt"
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -118,38 +110,27 @@ tasks.withType(JavaCompile).configureEach {
     options.incremental = true
     options.fork = true
     options.failOnError = true
-
-    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
-        options.release.set(targetJavaVersion)
-    }
+    options.compilerArgs << '-parameters'
 }
 
 processResources {
-    def props = [
-        version: version,
-        group  : project.group,
-        name   : project.name
-    ]
-    inputs.properties props
-    filteringCharset 'UTF-8'
-
-    filesMatching('plugin.yml') {
-        expand props
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    filesMatching(['META-INF/mods.toml', 'plugin.yml']) {
+        expand project.properties
     }
-
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    includeEmptyDirs = false
 }
 
 jar {
     manifest {
-        attributes(
-            'Implementation-Title'   : project.name,
-            'Implementation-Version' : project.version,
-            'Implementation-Vendor'  : project.group,
-            'Build-Timestamp'        : new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
-            'Created-By'             : "Gradle ${gradle.gradleVersion}"
-        )
+        attributes([
+            'Specification-Title': mod_id,
+            'Specification-Vendor': 'dev.spaxter',
+            'Specification-Version': '1',
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version,
+            'Implementation-Vendor': 'dev.spaxter',
+            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
     }
 }
 
