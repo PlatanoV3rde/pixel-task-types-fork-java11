@@ -14,6 +14,10 @@ plugins {
     id 'net.kyori.blossom' version '1.3.1'
 }
 
+def mod_id = 'tunombremod' // <-- cambia esto por el ID real de tu mod
+def mapping_channel = 'official'
+def mapping_version = '1.16.5'
+
 base {
     archivesName = mod_id
 }
@@ -82,7 +86,7 @@ dependencies {
     compileOnly 'com.leonardobishop:Quests:3.15.2'
 }
 
-def targetJavaVersion = 17
+def targetJavaVersion = 11
 java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)
     sourceCompatibility = javaVersion
@@ -111,10 +115,6 @@ tasks.withType(JavaCompile).configureEach {
     options.incremental = true
     options.fork = true
     options.failOnError = true
-
-    if (targetJavaVersion >= 17) {
-        options.compilerArgs += ['--enable-preview']
-    }
 
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
         options.release.set(targetJavaVersion)
