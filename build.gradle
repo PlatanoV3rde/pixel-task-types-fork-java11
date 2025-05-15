@@ -46,8 +46,8 @@ repositories {
     maven { url 'https://maven.izzel.io/releases' }
     maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
     maven { url 'https://oss.sonatype.org/content/groups/public/' }
-    maven { url 'https://repo.repsy.io/mvn/pixelmon-repo/releases' } // Nuevo repo para Pixelmon
-    maven { url 'https://repo.codemc.io/repository/maven-public/' } // Para Quests
+    maven { url 'https://repo.repsy.io/mvn/pixelmon-repo/releases' }
+    maven { url 'https://repo.codemc.io/repository/maven-public/' }
     maven { url 'https://maven.minecraftforge.net/' }
     flatDir { dirs "libs" }
 }
@@ -81,15 +81,13 @@ minecraft {
 dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.2.34'
     
-    // Dependencias corregidas
-    implementation fg.deobf('com.pixelmonmod:pixelmon:1.16.5-9.1.12-server') // Versión correcta
-    compileOnly 'com.leonardobishop.quests:quests-bukkit:3.15.2' // Versión correcta
+    // Dependencias principales usando JARs locales
+    implementation files('libs/Quests.jar')
+    implementation files('libs/Pixelmon-1.16.5-9.1.12-server.jar')
+    
+    // Otras dependencias
     compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
     compileOnly 'io.izzel.arclight:arclight-forge-1.16:1.0.25:spigot'
-    
-    // Si las dependencias no se resuelven, usa JARs locales
-    // implementation files('libs/Pixelmon-1.16.5-9.1.12-server.jar')
-    // implementation files('libs/Quests-3.15.2.jar')
 }
 
 tasks.register('proguard', ProGuardTask) {
