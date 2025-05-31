@@ -4,6 +4,7 @@ import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
 import com.pixelmonmod.pixelmon.enums.EnumAbilitySlot;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Clase que centraliza todas las evaluaciones de condiciones sobre un Pokémon:
@@ -26,12 +27,13 @@ public class PokemonConditions {
     /**
      * Devuelve true si la habilidad del Pokémon está en la lista de allowedAbilities.
      * Si la lista es null o está vacía, se considera que no hay filtro por habilidad.
+     * La comparación se hace en minúsculas para mayor robustez.
      */
     public static boolean hasAbility(Pokemon pokemon, List<String> allowedAbilities) {
         if (allowedAbilities == null || allowedAbilities.isEmpty()) {
             return true;
         }
-        String pokeAbilityName = pokemon.getAbility().getName();
+        String pokeAbilityName = pokemon.getAbility().getName().toLowerCase(Locale.ROOT);
         return allowedAbilities.contains(pokeAbilityName);
     }
 
