@@ -38,22 +38,32 @@ public class FishingTaskType extends PixelmonTaskType {
      */
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onFishingReel(final FishingEvent.Reel event) {
-        final ServerPlayerEntity player = event.player;
-        final Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
-        final QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(player.getUUID());
+        ServerPlayerEntity player = event.player;
+        Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
+        QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(player.getUUID());
 
-        if (event.optEntity.isEmpty()) {
+        // Evitar crash si no se puede obtener el jugador de Bukkit o de Quests
+        if (bukkitPlayer == null || questPlayer == null) {
             return;
         }
 
-        if (event.optEntity.get() instanceof PixelmonEntity pokemonEntity) {
+        // Si no hay entidad pescada, salir
+        if (event.optEntity == null || !event.optEntity.isPresent()) {
+            return;
+        }
+
+        Object caught = event.optEntity.get();
+        if (caught instanceof PixelmonEntity) {
+            PixelmonEntity pokemonEntity = (PixelmonEntity) caught;
             Pokemon pokemon = pokemonEntity.getPokemon();
 
-            for (final TaskUtils.PendingTask pendingTask :
-                 TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this)) {
-                final Task task = pendingTask.task();
-                final String rodType = event.getRodType().name().toLowerCase();
-                final List<String> requiredRodTypes = QuestHelper.getConfigStringListAsLowercase(task, "rods");
+            List<TaskUtils.PendingTask> pendingTasks = TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this);
+            for (int i = 0; i < pendingTasks.size(); i++) {
+                TaskUtils.PendingTask pendingTask = pendingTasks.get(i);
+                Task task = pendingTask.task();
+
+                String rodType = event.getRodType().name().toLowerCase();
+                List<String> requiredRodTypes = QuestHelper.getConfigStringListAsLowercase(task, "rods");
 
                 if (requiredRodTypes != null && !requiredRodTypes.contains(rodType)) {
                     continue;

@@ -21,7 +21,7 @@ import java.util.List;
 import org.bukkit.entity.Player;
 
 /**
- * Hatch Pokémon eggs task type.
+ * Use move task type.
  */
 public class MoveTaskType extends PixelmonTaskType {
     public MoveTaskType(PixelTaskTypes plugin) {
@@ -33,26 +33,34 @@ public class MoveTaskType extends PixelmonTaskType {
     }
 
     /**
-     * Runs after a Pokémon egg is hatched.
+     * Runs when a Pokémon uses a move in battle.
      */
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onUseMove(final AttackEvent.Use event) {
-        final ServerPlayerEntity player = event.user.getPlayerOwner();
+        ServerPlayerEntity player = event.user.getPlayerOwner();
 
+        // Salir si no hay jugador válido
         if (player == null) {
             return;
         }
 
-        final Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
-        final QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(player.getUUID());
-        final Pokemon pokemon = event.target.pokemon;
+        Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
+        QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(player.getUUID());
 
-        final String attackName = event.attack.getAttackName().toLowerCase();
+        // Evitar crash si no se puede obtener el jugador de Bukkit o de Quests
+        if (bukkitPlayer == null || questPlayer == null) {
+            return;
+        }
 
-        for (final TaskUtils.PendingTask pendingTask : TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this)) {
-            final Task task = pendingTask.task();
-            final List<String> requiredAttacks = QuestHelper.getConfigStringListAsLowercase(task, "moves");
+        Pokemon pokemon = event.target.pokemon;
+        String attackName = event.attack.getAttackName().toLowerCase();
 
+        List<TaskUtils.PendingTask> pendingTasks = TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this);
+        for (int i = 0; i < pendingTasks.size(); i++) {
+            TaskUtils.PendingTask pendingTask = pendingTasks.get(i);
+            Task task = pendingTask.task();
+
+            List<String> requiredAttacks = QuestHelper.getConfigStringListAsLowercase(task, "moves");
             if (requiredAttacks != null && !requiredAttacks.contains(attackName)) {
                 continue;
             }

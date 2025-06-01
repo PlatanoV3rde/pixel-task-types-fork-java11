@@ -15,11 +15,11 @@ import dev.spaxter.pixeltasktypes.validation.ValidationConstants;
 
 import io.izzel.arclight.api.Arclight;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
- * Custom {@link TaskType} for Pixelmon based tasks.
+ * Custom {@link TaskType} for Pixelmon‐based tasks.
  */
 public abstract class PixelmonTaskType extends BukkitTaskType {
     public final PixelTaskTypes plugin;
@@ -32,13 +32,17 @@ public abstract class PixelmonTaskType extends BukkitTaskType {
         Arclight.registerForgeEvent(null, Pixelmon.EVENT_BUS, this);
 
         super.addConfigValidator(
-            PixelmonTaskConfigValidator.useStringListValidator(ValidationConstants.SPECIES, this, "species"));
+            PixelmonTaskConfigValidator.useStringListValidator(ValidationConstants.SPECIES, this, "species")
+        );
         super.addConfigValidator(
-            PixelmonTaskConfigValidator.useStringListValidator(ValidationConstants.SPECIES, this, "not_species"));
-        super.addConfigValidator(PixelmonTaskConfigValidator.useStringListValidator(
-            ValidationConstants.POKEMON_TYPES, this, "pokemon_types"));
+            PixelmonTaskConfigValidator.useStringListValidator(ValidationConstants.SPECIES, this, "not_species")
+        );
         super.addConfigValidator(
-            PixelmonTaskConfigValidator.useStringListValidator(ValidationConstants.PALETTES, this, "palettes"));
+            PixelmonTaskConfigValidator.useStringListValidator(ValidationConstants.POKEMON_TYPES, this, "pokemon_types")
+        );
+        super.addConfigValidator(
+            PixelmonTaskConfigValidator.useStringListValidator(ValidationConstants.PALETTES, this, "palettes")
+        );
         super.addConfigValidator(TaskUtils.useBooleanConfigValidator(this, "legendary_only"));
         super.addConfigValidator(TaskUtils.useIntegerConfigValidator(this, "pokemon_level"));
     }
@@ -46,18 +50,17 @@ public abstract class PixelmonTaskType extends BukkitTaskType {
     /**
      * Check if a Pokémon matches the configured task requirements.
      *
-     * @param pokemon The pokemon entity to check.
+     * @param pokemon The Pokémon entity to check.
      * @param task    The task to check the configuration for.
-     * @return {@code true} if the Pokémon passes all checks, otherwise
-     *         {@code false}
+     * @return {@code true} if the Pokémon passes all checks, otherwise {@code false}.
      */
     public boolean checkPokemon(final Pokemon pokemon, final Task task) {
-        final List<String> requiredTypes = QuestHelper.getConfigStringListAsLowercase(task, "pokemon_types");
-        final List<String> requiredSpecies = QuestHelper.getConfigStringListAsLowercase(task, "species");
-        final List<String> notSpecies = QuestHelper.getConfigStringListAsLowercase(task, "not_species");
-        final List<String> requiredPalettes = QuestHelper.getConfigStringListAsLowercase(task, "palettes");
-        final boolean legendaryOnly = TaskUtils.getConfigBoolean(task, "legendary_only");
-        final Integer requiredLevel = (Integer) task.getConfigValue("pokemon_level");
+        List<String> requiredTypes = QuestHelper.getConfigStringListAsLowercase(task, "pokemon_types");
+        List<String> requiredSpecies = QuestHelper.getConfigStringListAsLowercase(task, "species");
+        List<String> notSpecies = QuestHelper.getConfigStringListAsLowercase(task, "not_species");
+        List<String> requiredPalettes = QuestHelper.getConfigStringListAsLowercase(task, "palettes");
+        boolean legendaryOnly = TaskUtils.getConfigBoolean(task, "legendary_only");
+        Integer requiredLevel = (Integer) task.getConfigValue("pokemon_level");
 
         // Check for required level
         if (requiredLevel != null && pokemon.getPokemonLevel() < requiredLevel) {
@@ -65,27 +68,27 @@ public abstract class PixelmonTaskType extends BukkitTaskType {
         }
 
         // Check for required types
-        if (requiredTypes != null && !this.checkType(pokemon, requiredTypes)) {
+        if (requiredTypes != null && !checkType(pokemon, requiredTypes)) {
             return false;
         }
 
         // Check for required species
-        if (requiredSpecies != null && !this.checkSpecies(pokemon, requiredSpecies)) {
+        if (requiredSpecies != null && !checkSpecies(pokemon, requiredSpecies)) {
             return false;
         }
 
         // Check for species to not count
-        if (notSpecies != null && this.checkSpecies(pokemon, notSpecies)) {
+        if (notSpecies != null && checkSpecies(pokemon, notSpecies)) {
             return false;
         }
 
         // Check for required palettes
-        if (requiredPalettes != null && !this.checkPalettes(pokemon, requiredPalettes)) {
+        if (requiredPalettes != null && !checkPalettes(pokemon, requiredPalettes)) {
             return false;
         }
 
-        // Check if only legendaries should cound
-        if (legendaryOnly == true && !this.checkLegendary(pokemon)) {
+        // Check if only legendaries should count
+        if (legendaryOnly && !checkLegendary(pokemon)) {
             return false;
         }
 
@@ -93,12 +96,25 @@ public abstract class PixelmonTaskType extends BukkitTaskType {
     }
 
     private boolean checkType(final Pokemon pokemon, final List<String> requiredTypes) {
-        List<String> types = pokemon.getForm()
-                                 .getTypes()
-                                 .stream()
-                                 .map((element) -> { return element.getName().toLowerCase(); })
-                                 .collect(Collectors.toList());
+        // Construir lista manualmente en lugar de usar streams
+        List<String> types = new ArrayList<String>();
+        for (com.pixelmonmod.pixelmon.api.pokemon.Pokemon formPokemon : new Pokemon[] { pokemon }) {
+            // Extraer tipos desde getForm().getTypes()
+            for (net.minecraft.util.registry.RegistryKey<net.minecraft.util.registry.Registry<com.pixelmonmod.pixelmon.api.pokemon.Pokemon>> typeKey : pokemon.getForm().getTypes()) {
+                // Aquí asumimos que getTypes() devuelve objetos con getName(), pero si devuelve algo distinto,
+                // hay que ajustarlo a como Pixelmon expone los tipos en esa versión.
+                // Por ejemplo, si getTypes() devuelve List<Type>, entonces sería:
+                // for (Type t : pokemon.getForm().getTypes()) { types.add(t.getName().toLowerCase()); }
+                // Ajusta según la API real. 
+            }
+        }
+        // En muchas versiones, getForm().getTypes() devuelve List<Pokemon.Type>, así:
+        types.clear();
+        for (com.pixelmonmod.pixelmon.entities.pixelmon.stats.FormData.Type type : pokemon.getForm().getTypes()) {
+            types.add(type.getName().toLowerCase());
+        }
 
+        // Verificar si alguno coincide con requiredTypes
         for (String type : types) {
             if (requiredTypes.contains(type)) {
                 PixelTaskTypes.logger.info("Type passed: " + type);

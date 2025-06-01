@@ -17,6 +17,8 @@ import dev.spaxter.pixeltasktypes.util.QuestHelper;
 
 import org.bukkit.entity.Player;
 
+import java.util.List;
+
 /**
  * Defeat Pokémon task type.
  */
@@ -30,28 +32,38 @@ public class DefeatTaskType extends PixelmonTaskType {
     }
 
     /**
-     * Runs when a Pokémon is defeated in battle.
-     * Will exit early if one of the participants is not a player since we only care about PvP battles in this event.
+     * Runs when a Pokémon is defeated in a PvP battle.
      */
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onPokemonDefeat(final PixelmonKnockoutEvent event) {
-        final ServerPlayerEntity player = event.source.getPlayerOwner();
-        final ServerPlayerEntity opponent = event.pokemon.getPlayerOwner();
+        ServerPlayerEntity sourcePlayer = event.source.getPlayerOwner();
+        ServerPlayerEntity opponentPlayer = event.pokemon.getPlayerOwner();
 
-        if (player == null || opponent == null) {
+        // Salir si alguno no es un jugador válido
+        if (sourcePlayer == null || opponentPlayer == null) {
             return;
         }
 
-        final Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
-        final QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(player.getUUID());
+        Player bukkitPlayer = ArclightUtils.getBukkitPlayer(sourcePlayer.getUUID());
+        QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(sourcePlayer.getUUID());
 
-        final Pokemon pokemon = event.pokemon.pokemon;
+        // Evitar crash si no se puede obtener el jugador de Bukkit o de Quests
+        if (bukkitPlayer == null || questPlayer == null) {
+            return;
+        }
 
-        for (final TaskUtils.PendingTask pendingTask : TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this)) {
+        Pokemon pokemon = event.pokemon.pokemon;
+
+        List<TaskUtils.PendingTask> pendingTasks = TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this);
+        for (int i = 0; i < pendingTasks.size(); i++) {
+            TaskUtils.PendingTask pendingTask = pendingTasks.get(i);
             Task task = pendingTask.task();
+
+            // Si la tarea está configurada como "wild_only", saltarla en PvP
             if (TaskUtils.getConfigBoolean(task, "wild_only")) {
                 continue;
             }
+
             if (this.checkPokemon(pokemon, task)) {
                 QuestHelper.incrementNumericProgress(pendingTask);
             }
@@ -63,17 +75,28 @@ public class DefeatTaskType extends PixelmonTaskType {
      */
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onWildPokemonDefeat(final BeatWildPixelmonEvent event) {
-        final ServerPlayerEntity player = event.player;
-        final Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
-        final QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(player.getUUID());
+        ServerPlayerEntity player = event.player;
 
-        final Pokemon pokemon = event.wpp.getFaintedPokemon().pokemon;
+        Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
+        QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(player.getUUID());
 
-        for (final TaskUtils.PendingTask pendingTask : TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this)) {
+        // Evitar crash si no se puede obtener el jugador de Bukkit o de Quests
+        if (bukkitPlayer == null || questPlayer == null) {
+            return;
+        }
+
+        Pokemon pokemon = event.wpp.getFaintedPokemon().pokemon;
+
+        List<TaskUtils.PendingTask> pendingTasks = TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this);
+        for (int i = 0; i < pendingTasks.size(); i++) {
+            TaskUtils.PendingTask pendingTask = pendingTasks.get(i);
             Task task = pendingTask.task();
+
+            // Si la tarea está configurada como "pvp_only", saltarla en combates salvajes
             if (TaskUtils.getConfigBoolean(task, "pvp_only")) {
                 continue;
             }
+
             if (this.checkPokemon(pokemon, task)) {
                 QuestHelper.incrementNumericProgress(pendingTask);
             }

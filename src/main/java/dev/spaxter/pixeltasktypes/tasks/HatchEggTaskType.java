@@ -14,6 +14,8 @@ import dev.spaxter.pixeltasktypes.PixelTaskTypes;
 import dev.spaxter.pixeltasktypes.util.ArclightUtils;
 import dev.spaxter.pixeltasktypes.util.QuestHelper;
 
+import java.util.List;
+
 import org.bukkit.entity.Player;
 
 /**
@@ -31,13 +33,23 @@ public class HatchEggTaskType extends PixelmonTaskType {
      */
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onEggHatch(final EggHatchEvent.Post event) {
-        final ServerPlayerEntity player = event.getPlayer();
-        final Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
-        final QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(player.getUUID());
+        ServerPlayerEntity player = event.getPlayer();
+        Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
+        QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(player.getUUID());
+
+        // 1) Validación de nulos
+        if (bukkitPlayer == null || questPlayer == null) {
+            return;
+        }
+
+        // 2) Obtener el Pokémon resultante del huevo
         Pokemon pokemon = event.getPokemon();
 
-        for (final TaskUtils.PendingTask pendingTask : TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this)) {
-            final Task task = pendingTask.task();
+        // 3) Iterar con for tradicional y comprobar objetivos
+        List<TaskUtils.PendingTask> pendingTasks = TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this);
+        for (int i = 0; i < pendingTasks.size(); i++) {
+            TaskUtils.PendingTask pendingTask = pendingTasks.get(i);
+            Task task = pendingTask.task();
 
             if (this.checkPokemon(pokemon, task)) {
                 QuestHelper.incrementNumericProgress(pendingTask);

@@ -11,8 +11,8 @@ import dev.spaxter.pixeltasktypes.tasks.FishingTaskType;
 import dev.spaxter.pixeltasktypes.tasks.HatchEggTaskType;
 import dev.spaxter.pixeltasktypes.tasks.MoveTaskType;
 import dev.spaxter.pixeltasktypes.util.Resources;
-import dev.spaxter.pixeltasktypes.validation.ValidationConstants;
 
+import java.io.InputStream;
 import java.util.logging.Logger;
 
 import org.bukkit.plugin.java.JavaPlugin;
@@ -31,24 +31,44 @@ public final class PixelTaskTypes extends JavaPlugin {
     @Override
     public void onEnable() {
         logger = this.getLogger();
-        PixelTaskTypes.ART = Resources.readAsString(this.getResource("art.txt"));
 
-        if (!this.checkArclight()) {
-            logger.warning(
-                "This server does not seem to be running Arclight Forge. PixelTaskTypes will most likely not work.");
+        // Leer recurso "art.txt" desde el JAR
+        InputStream artStream = this.getResource("art.txt");
+        if (artStream != null) {
+            ART = Resources.readAsString(artStream);
+        } else {
+            ART = "";
+            logger.warning("No se encontró el recurso art.txt.");
         }
-        if (!this.checkPixelmon()) {
+
+        if (!checkArclight()) {
             logger.warning(
-                "This server does not seem to have the Pixelmon Mod installed. PixelTaskTypes will not work without it.");
+                "Este servidor no parece estar ejecutando Arclight Forge. PixelTaskTypes podría no funcionar correctamente.");
+        }
+        if (!checkPixelmon()) {
+            logger.warning(
+                "Este servidor no parece tener instalado el mod Pixelmon. PixelTaskTypes no funcionará sin él.");
         }
 
-        this.getLogger().info("\n" + PixelTaskTypes.ART);
-        this.questsApi = (BukkitQuestsPlugin) this.getServer().getPluginManager().getPlugin("Quests");
+        logger.info("\n" + ART);
 
-        this.registerEvents();
+        // Obtener la instancia de Quests
+        if (this.getServer().getPluginManager().getPlugin("Quests") instanceof BukkitQuestsPlugin) {
+            this.questsApi = (BukkitQuestsPlugin) this.getServer().getPluginManager().getPlugin("Quests");
+        } else {
+            this.questsApi = null;
+            logger.warning("No se encontró el plugin Quests o no es compatible. Las tareas no se registrarán.");
+        }
+
+        registerEvents();
     }
 
     private void registerEvents() {
+        if (this.questsApi == null) {
+            // No hay Quests: no registrar tipos de tarea
+            return;
+        }
+
         TaskTypeManager taskTypeManager = this.questsApi.getTaskTypeManager();
         taskTypeManager.registerTaskType(new CatchTaskType(this));
         taskTypeManager.registerTaskType(new CleanFossilTaskType(this));

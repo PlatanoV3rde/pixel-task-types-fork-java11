@@ -40,6 +40,12 @@ public class CatchTaskType extends PixelmonTaskType {
         final ServerPlayerEntity player = event.getPlayer();
         final Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
         final QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(player.getUUID());
+
+        // ✅ Evitar crash si no se puede obtener el jugador de Bukkit o de Quests
+        if (bukkitPlayer == null || questPlayer == null) {
+            return;
+        }
+
         Pokemon pokemon = event.getPokemon().getPokemon();
 
         for (final TaskUtils.PendingTask pendingTask : TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this)) {

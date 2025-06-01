@@ -1,11 +1,9 @@
 buildscript {
     repositories {
         mavenCentral()
-        maven { url 'https://plugins.gradle.org/m2/' }
     }
     dependencies {
         classpath 'com.guardsquare:proguard-gradle:7.6.1'
-        classpath 'net.minecraftforge.gradle:ForgeGradle:6.0.16'
     }
 }
 
@@ -20,52 +18,74 @@ base {
     archivesName = mod_id
 }
 
+import proguard.gradle.ProGuardTask
+
 group = 'dev.spaxter'
 version = '1.0'
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
+// ----------------------------------------------------------------
+// Configuración de ProGuard (igual que antes)
+// ----------------------------------------------------------------
+configurations {
+    proguardConfig {
+        canBeResolved = true
+        canBeConsumed = false
     }
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
 }
 
 repositories {
     mavenCentral()
     mavenLocal()
-    maven { url 'https://maven.izzel.io/releases' }
-    maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
-    maven { url 'https://oss.sonatype.org/content/groups/public/' }
-    maven { url 'https://repo.repsy.io/mvn/pixelmon-repo/releases' }
-    maven { url 'https://repo.codemc.io/repository/maven-public/' }
-    maven { url 'https://maven.minecraftforge.net/' }
-    maven { url 'https://repo.lucko.me/' } // Añadido para Quests
-    flatDir { dirs "libs" }
+
+    // 1) Quests API desde LuckPerms Repository
+    //    URL correcto: https://repo.lucko.me/repository/lucko-releases/
+    maven { url = 'https://repo.lucko.me/repository/lucko-releases/' }
+
+    // 2) Arclight API desde Izzel Repository
+    //    URL correcto: https://maven.izzel.io/releases
+    maven { url = 'https://maven.izzel.io/releases' }
+
+    // 3) Repositorio de SpigotMC (para la API de Bukkit/Spigot)
+    maven {
+        name = "spigotmc-repo"
+        url  = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+    }
+
+    // 4) Repositorio de Sonatype (para dependencias comunes)
+    maven {
+        name = "sonatype"
+        url  = "https://oss.sonatype.org/content/groups/public/"
+    }
+
+    // 5) Carpeta local “libs/” (para Pixelmon JAR y, opcionalmente, cualquier .jar local)
+    flatDir {
+        dirs "libs"
+    }
 }
 
 minecraft {
     mappings channel: mapping_channel, version: mapping_version
     copyIdeResources = true
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     runs {
         configureEach {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
-            jvmArgs '-Dmixin.env.disableRefMap=true'
             mods {
                 "${mod_id}" {
                     source sourceSets.main
                 }
             }
         }
-        client {}
-        server { args '--nogui' }
+        client { }
+        server {
+            args '--nogui'
+        }
         data {
             workingDirectory project.file('run-data')
-            args '--mod', mod_id, '--all',
+            args '--mod', mod_id,
+                 '--all',
                  '--output', file('src/generated/resources/'),
                  '--existing', file('src/main/resources/')
         }
@@ -73,44 +93,55 @@ minecraft {
 }
 
 dependencies {
-    // Forge para 1.16.5
-    minecraft 'net.minecraftforge:forge:1.16.5-36.2.34'
+    // =============================
+    // 1) Forge 1.16.5
+    // =============================
+    minecraft "net.minecraftforge:forge:1.16.5-36.2.34"
 
-    // Dependencias de Pixelmon y Quests (usando compileOnly para desarrollo)
+    // =============================
+    // 2) Pixelmon API (compileOnly desde JAR local en libs/)
+    //    Pon “Pixelmon-1.16.5-9.1.12.jar” dentro de la carpeta libs/
+    // =============================
     compileOnly files('libs/Pixelmon-1.16.5-9.1.12.jar')
-    compileOnly files('libs/Quests.jar')
-    
-    // Si necesitas las APIs en tiempo de compilación
-    implementation files('libs/Pixelmon-1.16.5-9.1.12.jar')
-    implementation files('libs/Quests.jar')
 
-    // Otras dependencias necesarias
+    // =============================
+    // 3) Quests API (compileOnly desde repo.lucko.me)
+    //    Se descargará automáticamente Quests:3.15.2
+    // =============================
+    compileOnly 'com.leonardobishop:Quests:3.15.2'
+
+    // =============================
+    // 4) Spigot/Bukkit API (solo compileOnly)
+    // =============================
     compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
+
+    // =============================
+    // 5) Arclight (compileOnly, descargado desde maven.izzel.io)
+    // =============================
     compileOnly 'io.izzel.arclight:arclight-forge-1.16:1.0.25:spigot'
-    
-    // Para incluir dependencias en el JAR final
-    runtimeOnly files('libs/Pixelmon-1.16.5-9.1.12.jar')
-    runtimeOnly files('libs/Quests.jar')
 }
 
-// Configuración para incluir dependencias en el JAR final
-jar {
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+def targetJavaVersion = 11
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion.set(JavaLanguageVersion.of(targetJavaVersion))
     }
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    
-    manifest {
-        attributes([
-            'Specification-Title':    mod_id,
-            'Specification-Vendor':   'dev.spaxter',
-            'Specification-Version':  '1',
-            'Implementation-Title':   project.name,
-            'Implementation-Version': project.version,
-            'Implementation-Vendor':  'dev.spaxter',
-            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ])
-    }
+}
+
+tasks.register('proguard', ProGuardTask) {
+    dependsOn jar
+
+    injars file("${buildDir}/libs/${project.name}-${project.version}.jar")
+    outjars file("${buildDir}/libs/${project.name}-obfuscated.jar")
+
+    libraryjars files(System.getProperty("java.home") + "/jmods/")
+    libraryjars files("./libs")
+
+    configuration file('proguard.pro')
+    printmapping file("${buildDir}/proguard/mapping.txt")
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -118,12 +149,39 @@ tasks.withType(JavaCompile).configureEach {
     options.incremental = true
     options.fork = true
     options.failOnError = true
-    options.compilerArgs << '-parameters'
+
+    // Java 11 no necesita --enable-preview
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release.set(targetJavaVersion)
+    }
 }
 
 processResources {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    filesMatching(['META-INF/mods.toml', 'plugin.yml']) {
-        expand project.properties
+    def props = [
+        version: version,
+        group  : project.group,
+        name   : project.name
+    ]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    includeEmptyDirs = false
+}
+
+jar {
+    manifest {
+        attributes(
+            'Implementation-Title'   : project.name,
+            'Implementation-Version' : project.version,
+            'Implementation-Vendor'  : project.group,
+            'Build-Timestamp'        : new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+            'Created-By'             : "Gradle ${gradle.gradleVersion}"
+        )
     }
 }
+
+tasks.build.dependsOn tasks.proguard
