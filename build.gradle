@@ -20,7 +20,6 @@ base {
     archivesName = mod_id
 }
 
-import proguard.gradle.ProGuardTask
 group = 'dev.spaxter'
 version = '1.0'
 
@@ -32,14 +31,6 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
-configurations {
-    proguardConfig {
-        canBeResolved = true
-        canBeConsumed = false
-    }
-    pixelmonDownload // Configuración para descargar Pixelmon
-}
-
 repositories {
     mavenCentral()
     mavenLocal()
@@ -49,6 +40,7 @@ repositories {
     maven { url 'https://repo.repsy.io/mvn/pixelmon-repo/releases' }
     maven { url 'https://repo.codemc.io/repository/maven-public/' }
     maven { url 'https://maven.minecraftforge.net/' }
+    maven { url 'https://repo.lucko.me/' } // Añadido para Quests
     flatDir { dirs "libs" }
 }
 
@@ -73,36 +65,52 @@ minecraft {
         server { args '--nogui' }
         data {
             workingDirectory project.file('run-data')
-            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            args '--mod', mod_id, '--all',
+                 '--output', file('src/generated/resources/'),
+                 '--existing', file('src/main/resources/')
         }
     }
 }
 
 dependencies {
+    // Forge para 1.16.5
     minecraft 'net.minecraftforge:forge:1.16.5-36.2.34'
 
-    // JARs locales
+    // Dependencias de Pixelmon y Quests (usando compileOnly para desarrollo)
+    compileOnly files('libs/Pixelmon-1.16.5-9.1.12.jar')
+    compileOnly files('libs/Quests.jar')
+    
+    // Si necesitas las APIs en tiempo de compilación
+    implementation files('libs/Pixelmon-1.16.5-9.1.12.jar')
     implementation files('libs/Quests.jar')
-    implementation files('libs/Pixelmon-1.16.5-9.1.12-server.jar')
 
-    // Otras dependencias
+    // Otras dependencias necesarias
     compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
     compileOnly 'io.izzel.arclight:arclight-forge-1.16:1.0.25:spigot'
-
-    // Pixelmon para descarga automática
-    pixelmonDownload 'com.pixelmonmod:pixelmon:1.16.5-9.1.12-server'
+    
+    // Para incluir dependencias en el JAR final
+    runtimeOnly files('libs/Pixelmon-1.16.5-9.1.12.jar')
+    runtimeOnly files('libs/Quests.jar')
 }
 
-tasks.register('proguard', ProGuardTask) {
-    dependsOn jar
-    injars jar.archiveFile
-    outjars "${buildDir}/libs/${base.archivesName.get()}-${version}-obfuscated.jar"
-
-    libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod"
-    libraryjars configurations.runtimeClasspath
-
-    configuration file('proguard.pro')
-    printmapping "${buildDir}/proguard/mapping.txt"
+// Configuración para incluir dependencias en el JAR final
+jar {
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    
+    manifest {
+        attributes([
+            'Specification-Title':    mod_id,
+            'Specification-Vendor':   'dev.spaxter',
+            'Specification-Version':  '1',
+            'Implementation-Title':   project.name,
+            'Implementation-Version': project.version,
+            'Implementation-Vendor':  'dev.spaxter',
+            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -119,39 +127,3 @@ processResources {
         expand project.properties
     }
 }
-
-jar {
-    manifest {
-        attributes([
-            'Specification-Title': mod_id,
-            'Specification-Vendor': 'dev.spaxter',
-            'Specification-Version': '1',
-            'Implementation-Title': project.name,
-            'Implementation-Version': project.version,
-            'Implementation-Vendor': 'dev.spaxter',
-            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ])
-    }
-}
-
-// Tarea para descargar Pixelmon y guardarlo en libs
-def pixelmonJar = 'Pixelmon-1.16.5-9.1.12-server.jar'
-
-tasks.register('downloadPixelmonJar', Copy) {
-    dependsOn configurations.pixelmonDownload
-    from {
-        configurations.pixelmonDownload.resolve()
-    }
-    into 'libs'
-    rename { pixelmonJar }
-
-    doFirst {
-        println "Descargando Pixelmon..."
-    }
-    doLast {
-        println "Pixelmon guardado en libs/${pixelmonJar}"
-    }
-}
-
-// Hacer que la tarea build dependa de la descarga de Pixelmon
-tasks.build.dependsOn tasks.downloadPixelmonJar

@@ -7,46 +7,52 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import com.leonardobishop.quests.bukkit.util.TaskUtils;
 import com.leonardobishop.quests.common.player.QPlayer;
 import com.leonardobishop.quests.common.quest.Task;
-import com.pixelmonmod.pixelmon.api.events.FossilCleanerEvent;
-import com.pixelmonmod.pixelmon.items.FossilItem;
+import com.pixelmonmod.pixelmon.api.events.CaptureEvent;
+import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
 
 import dev.spaxter.pixeltasktypes.PixelTaskTypes;
 import dev.spaxter.pixeltasktypes.util.ArclightUtils;
 import dev.spaxter.pixeltasktypes.util.QuestHelper;
+import dev.spaxter.pixeltasktypes.validation.PixelmonTaskConfigValidator;
+import dev.spaxter.pixeltasktypes.validation.ValidationConstants;
 
 import java.util.List;
 
 import org.bukkit.entity.Player;
 
 /**
- * Clean fossil task type.
+ * Catch Pokémon task type.
  */
-public class CleanFossilTaskType extends PixelmonTaskType {
-    public CleanFossilTaskType(PixelTaskTypes plugin) {
-        super(plugin, "clean_fossils", "Clean fossils in a fossil machine");
+public class CatchTaskType extends PixelmonTaskType {
+    public CatchTaskType(PixelTaskTypes plugin) {
+        super(plugin, "catch_pokemon", "Catch a set number of Pokémon");
 
         super.addConfigValidator(TaskUtils.useRequiredConfigValidator(this, "amount"));
+        super.addConfigValidator(
+            PixelmonTaskConfigValidator.useStringListValidator(ValidationConstants.POKE_BALLS, this, "poke_balls"));
     }
 
     /**
-     * Runs when a fossil is obtained from the cleaning machine.
+     * Runs when a Pokémon is successfully captured.
      */
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void onFossilClean(final FossilCleanerEvent.ObtainingCleanFossil event) {
+    public void onPokemonCatch(final CaptureEvent.SuccessfulCapture event) {
         final ServerPlayerEntity player = event.getPlayer();
         final Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
         final QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(player.getUUID());
+        Pokemon pokemon = event.getPokemon().getPokemon();
 
-        if (event.getFossil() instanceof FossilItem fossil) {
-            String fossilType = fossil.getFossil().name().toLowerCase();
-            for (final TaskUtils.PendingTask pendingTask :
-                 TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this)) {
-                final Task task = pendingTask.task();
-                final List<String> requiredFossilTypes = QuestHelper.getConfigStringListAsLowercase(task, "fossils");
+        for (final TaskUtils.PendingTask pendingTask : TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this)) {
+            final Task task = pendingTask.task();
 
-                if (requiredFossilTypes != null && !requiredFossilTypes.contains(fossilType)) {
-                    continue;
-                }
+            List<String> requiredPokeballs = QuestHelper.getConfigStringListAsLowercase(task, "poke_balls");
+            String pokeball = event.getPokeBall().getBallType().getName().toLowerCase();
+
+            if (requiredPokeballs != null && !requiredPokeballs.contains(pokeball)) {
+                continue;
+            }
+
+            if (this.checkPokemon(pokemon, task)) {
                 QuestHelper.incrementNumericProgress(pendingTask);
             }
         }

@@ -89,17 +89,4 @@ public class ValidationConstants {
             .filter(value -> value != null)
             .map((attackName) -> attackName.toLowerCase().replaceAll(" ", "_"))
             .toList();
-
-    // ───────────────────────────────────────────────────────────────────────────
-    // Nuevas constantes para las claves de configuración de UB, HA y Ability
-    // ───────────────────────────────────────────────────────────────────────────
-
-    /** Clave para indicar “Ultra Beast” (booleano). */
-    public static final String UB = "ub";
-
-    /** Clave para indicar “Hidden Ability” (booleano). */
-    public static final String HA = "ha";
-
-    /** Clave para la lista blanca de habilidades (lista de strings). */
-    public static final String ABILITY = "ability";
 }
