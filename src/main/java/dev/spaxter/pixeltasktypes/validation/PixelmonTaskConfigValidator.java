@@ -6,54 +6,52 @@ import com.leonardobishop.quests.common.tasktype.TaskType;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.jline.utils.Levenshtein;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * Custom validation methods for Pixelmon task types.
+ * Custom validation methods for Pixelmon tasks types.
  */
 public class PixelmonTaskConfigValidator {
+
     /**
-     * Validates a config field containing a list of strings using an input list of
+     * Validates a config field containing a list of strings using an input list for
      * valid values.
      *
-     * @param validValues List of valid values (all lowercase)
-     * @param type        TaskType instance
-     * @param paths       Path(s) to the config field
+     * @param validValues List of valid values
+     * @param type TaskType instance
+     * @param paths Path list to config field
      * @return {@code TaskType.ConfigValidator} validator instance
      */
     public static TaskType.ConfigValidator useStringListValidator(final List<String> validValues,
-                                                                  final TaskType type,
-                                                                  final String... paths) {
+                                                                final TaskType type,
+                                                                final String... paths) {
         return new TaskType.ConfigValidator() {
             @Override
-            public void validate(java.util.Map<String, Object> config, List<ConfigProblem> problems) {
-                for (String path : paths) {
-                    Object configValue = config.get(path);
+            public void validateConfig(Map<String, Object> config, Set<ConfigProblem> problems) {
+                for (final String path : paths) {
+                    final Object configList = config.get(path);
 
-                    if (configValue == null) {
+                    if (configList == null) {
                         continue;
                     }
 
-                    List<String> valuesToCheck = new ArrayList<String>();
+                    final List<String> values = new ArrayList<>();
 
-                    if (configValue instanceof List<?>) {
-                        @SuppressWarnings("unchecked")
-                        List<Object> objectList = (List<Object>) configValue;
-                        for (Object obj : objectList) {
-                            valuesToCheck.add(String.valueOf(obj));
+                    if (configList instanceof List) {
+                        for (Object object : (List<?>) configList) {
+                            values.add(String.valueOf(object));
                         }
                     } else {
-                        valuesToCheck.add(String.valueOf(configValue));
+                        values.add(String.valueOf(configList));
                     }
 
-                    for (String value : valuesToCheck) {
-                        String lowered = value.toLowerCase();
-                        if (!validValues.contains(lowered)) {
-                            String closestMatch = findClosestMatch(lowered, validValues);
+                    for (final String value : values) {
+                        if (!validValues.contains(value.toLowerCase())) {
+                            String closestMatch = findClosestMatch(value, validValues);
                             ConfigProblem problem = new ConfigProblem(
                                 ConfigProblemType.ERROR,
-                                "Invalid value for field '" + path + "': '" + value +
+                                "Invalid value for field '" + path + "': '" + value + 
                                 "'. Did you mean '" + closestMatch + "'?",
                                 null,
                                 path
@@ -67,24 +65,53 @@ public class PixelmonTaskConfigValidator {
     }
 
     /**
-     * Find the closest matching string from a list of candidate strings.
+     * Find the closest matching string from a list of strings.
      *
-     * @param input      Input string.
-     * @param candidates Possible candidates to match against (all lowercase).
-     * @return The closest matching string from candidates.
+     * @param input Input string
+     * @param candidates Possible candidates to match for
+     * @return The closest matching string
      */
     private static String findClosestMatch(final String input, final List<String> candidates) {
         String closestMatch = null;
         int minDistance = Integer.MAX_VALUE;
 
-        for (String candidate : candidates) {
-            int distance = Levenshtein.distance(input, candidate);
+        for (final String candidate : candidates) {
+            int distance = calculateLevenshteinDistance(input, candidate);
             if (distance < minDistance) {
                 minDistance = distance;
                 closestMatch = candidate;
             }
         }
 
-        return closestMatch;
+        return closestMatch != null ? closestMatch : "";
+    }
+
+    /**
+     * Calculates Levenshtein distance between two strings
+     * (Replacement for org.jline.utils.Levenshtein)
+     */
+    private static int calculateLevenshteinDistance(String a, String b) {
+        a = a.toLowerCase();
+        b = b.toLowerCase();
+        int[] costs = new int[b.length() + 1];
+        
+        for (int j = 0; j < costs.length; j++) {
+            costs[j] = j;
+        }
+        
+        for (int i = 1; i <= a.length(); i++) {
+            costs[0] = i;
+            int nw = i - 1;
+            for (int j = 1; j <= b.length(); j++) {
+                int cj = Math.min(
+                    1 + Math.min(costs[j], costs[j - 1]),
+                    a.charAt(i - 1) == b.charAt(j - 1) ? nw : nw + 1
+                );
+                nw = costs[j];
+                costs[j] = cj;
+            }
+        }
+        
+        return costs[b.length()];
     }
 }

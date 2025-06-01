@@ -5,7 +5,7 @@ import com.leonardobishop.quests.common.player.questprogressfile.TaskProgress;
 import com.leonardobishop.quests.common.quest.Task;
 
 import java.util.List;
-
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 /**
@@ -49,6 +49,9 @@ public class QuestHelper {
             return null;
         }
 
-        return configList.stream().map((value) -> value.toLowerCase()).toList();
+        // Modificado para ser compatible con Java 8/11
+        return configList.stream()
+               .map(String::toLowerCase)
+               .collect(Collectors.toList());
     }
 }

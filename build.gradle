@@ -23,9 +23,6 @@ import proguard.gradle.ProGuardTask
 group = 'dev.spaxter'
 version = '1.0'
 
-// ----------------------------------------------------------------
-// Configuración de ProGuard (igual que antes)
-// ----------------------------------------------------------------
 configurations {
     proguardConfig {
         canBeResolved = true
@@ -34,30 +31,26 @@ configurations {
 }
 
 repositories {
+    // repositorio central
     mavenCentral()
     mavenLocal()
 
-    // 1) Quests API desde LuckPerms Repository
-    //    URL correcto: https://repo.lucko.me/repository/lucko-releases/
-    maven { url = 'https://repo.lucko.me/repository/lucko-releases/' }
-
-    // 2) Arclight API desde Izzel Repository
-    //    URL correcto: https://maven.izzel.io/releases
+    // Arclight (descarga desde Izzel)
     maven { url = 'https://maven.izzel.io/releases' }
 
-    // 3) Repositorio de SpigotMC (para la API de Bukkit/Spigot)
+    // SpigotMC (para Spigot API)
     maven {
         name = "spigotmc-repo"
         url  = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
     }
 
-    // 4) Repositorio de Sonatype (para dependencias comunes)
+    // Sonatype OSS (varias dependencias comunes)
     maven {
         name = "sonatype"
         url  = "https://oss.sonatype.org/content/groups/public/"
     }
 
-    // 5) Carpeta local “libs/” (para Pixelmon JAR y, opcionalmente, cualquier .jar local)
+    // Carpeta "libs/" local (para Pixelmon y Quests JAR)
     flatDir {
         dirs "libs"
     }
@@ -93,31 +86,19 @@ minecraft {
 }
 
 dependencies {
-    // =============================
-    // 1) Forge 1.16.5
-    // =============================
+    // Forge 1.16.5
     minecraft "net.minecraftforge:forge:1.16.5-36.2.34"
 
-    // =============================
-    // 2) Pixelmon API (compileOnly desde JAR local en libs/)
-    //    Pon “Pixelmon-1.16.5-9.1.12.jar” dentro de la carpeta libs/
-    // =============================
+    // Pixelmon API (desde JAR local en libs/)
     compileOnly files('libs/Pixelmon-1.16.5-9.1.12.jar')
+    
+    // Quests API (desde JAR local en libs/)
+    compileOnly files('libs/Quests.jar')
 
-    // =============================
-    // 3) Quests API (compileOnly desde repo.lucko.me)
-    //    Se descargará automáticamente Quests:3.15.2
-    // =============================
-    compileOnly 'com.leonardobishop:Quests:3.15.2'
-
-    // =============================
-    // 4) Spigot/Bukkit API (solo compileOnly)
-    // =============================
+    // Spigot/Bukkit API
     compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
 
-    // =============================
-    // 5) Arclight (compileOnly, descargado desde maven.izzel.io)
-    // =============================
+    // Arclight
     compileOnly 'io.izzel.arclight:arclight-forge-1.16:1.0.25:spigot'
 }
 
@@ -150,7 +131,6 @@ tasks.withType(JavaCompile).configureEach {
     options.fork = true
     options.failOnError = true
 
-    // Java 11 no necesita --enable-preview
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
         options.release.set(targetJavaVersion)
     }
