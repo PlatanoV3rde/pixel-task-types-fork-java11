@@ -24,6 +24,7 @@ import org.bukkit.entity.Player;
  * Catch Pokémon task type.
  */
 public class CatchTaskType extends PixelmonTaskType {
+
     public CatchTaskType(PixelTaskTypes plugin) {
         super(plugin, "catch_pokemon", "Catch a set number of Pokémon");
 
@@ -41,19 +42,25 @@ public class CatchTaskType extends PixelmonTaskType {
         final Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
         final QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(player.getUUID());
 
-        // ✅ Evitar crash si no se puede obtener el jugador de Bukkit o de Quests
+        // Evitar crash si no se puede obtener el jugador de Bukkit o de Quests
         if (bukkitPlayer == null || questPlayer == null) {
             return;
         }
 
-        Pokemon pokemon = event.getPokemon().getPokemon();
+        final List<TaskUtils.PendingTask> pendingTasks = TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this);
 
-        for (final TaskUtils.PendingTask pendingTask : TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this)) {
+        // Verificación para evitar NullPointerException
+        if (pendingTasks == null || pendingTasks.isEmpty()) {
+            return;
+        }
+
+        Pokemon pokemon = event.getPokemon().getPokemon();
+        String pokeball = event.getPokeBall().getBallType().getName().toLowerCase();
+
+        for (final TaskUtils.PendingTask pendingTask : pendingTasks) {
             final Task task = pendingTask.task();
 
             List<String> requiredPokeballs = QuestHelper.getConfigStringListAsLowercase(task, "poke_balls");
-            String pokeball = event.getPokeBall().getBallType().getName().toLowerCase();
-
             if (requiredPokeballs != null && !requiredPokeballs.contains(pokeball)) {
                 continue;
             }
