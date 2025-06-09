@@ -41,41 +41,30 @@ public class MoveTaskType extends PixelmonTaskType {
             return;
         }
 
-        // --- DEBUG: nombre crudo y normalizado del ataque
-        String rawAttackName = event.attack.getAttackName();
-        String attackName = rawAttackName.toLowerCase();
-        plugin.getLogger().info("[MoveTaskType] Jugador " + player.getUUID() +
-            " usó ataque: " + rawAttackName);
-
         Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
         QPlayer questPlayer = this.plugin.getQuestsApi()
             .getPlayerManager().getPlayer(player.getUUID());
         Pokemon pokemon = event.target.pokemon;
 
-        // Iterar sobre las tareas pendientes aplicables
+        // Nombre del ataque en minúsculas
+        String attackName = event.attack.getAttackName().toLowerCase();
+
+        // Recorremos todas las tareas que puedan aplicarse
         for (TaskUtils.PendingTask pendingTask :
                 TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this)) {
 
             Task task = pendingTask.task();
-            // Lista de movimientos configurados, en minúsculas
+            // Obtenemos la lista de movimientos configurados (minúscula)
             List<String> requiredAttacks =
                 QuestHelper.getConfigStringListAsLowercase(task, "moves");
 
-            // --- DEBUG: imprimir lista de movimientos de la config
-            plugin.getLogger().info("[MoveTaskType] Movimientos configurados para tarea "
-                + task.getId() + ": " + requiredAttacks);
-
-            // Si hay movimientos configurados y el actual no está entre ellos, saltamos
-            if (requiredAttacks != null
-                    && !requiredAttacks.isEmpty()
-                    && !requiredAttacks.contains(attackName)) {
+            // Si existe la lista y el ataque no está en ella, la saltamos
+            if (requiredAttacks != null && !requiredAttacks.contains(attackName)) {
                 continue;
             }
 
-            // Si el Pokémon cumple el filtro de la tarea, incrementamos progreso
+            // Si el Pokémon cumple el criterio de la tarea, incrementamos el progreso
             if (this.checkPokemon(pokemon, task)) {
-                plugin.getLogger().info("[MoveTaskType] Incrementando progreso para tarea "
-                    + task.getId());
                 QuestHelper.incrementNumericProgress(pendingTask);
             }
         }
