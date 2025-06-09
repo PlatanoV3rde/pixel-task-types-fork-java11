@@ -41,29 +41,32 @@ public class MoveTaskType extends PixelmonTaskType {
             return;
         }
 
+        // Normalizamos nombre de ataque: trim → lowercase → espacios a '_'
+        String rawAttack = event.attack.getAttackName();
+        String attackName = rawAttack == null
+            ? ""
+            : rawAttack.trim()
+                       .toLowerCase()
+                       .replaceAll("\\s+", "_");
+
         Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
         QPlayer questPlayer = this.plugin.getQuestsApi()
             .getPlayerManager().getPlayer(player.getUUID());
         Pokemon pokemon = event.target.pokemon;
-
-        // Nombre del ataque en minúsculas
-        String attackName = event.attack.getAttackName().toLowerCase();
 
         // Recorremos todas las tareas que puedan aplicarse
         for (TaskUtils.PendingTask pendingTask :
                 TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this)) {
 
             Task task = pendingTask.task();
-            // Obtenemos la lista de movimientos configurados (minúscula)
-            List<String> requiredAttacks =
-                QuestHelper.getConfigStringListAsLowercase(task, "moves");
+            List<String> movs = QuestHelper.getConfigStringListAsLowercase(task, "moves");
 
-            // Si existe la lista y el ataque no está en ella, la saltamos
-            if (requiredAttacks != null && !requiredAttacks.contains(attackName)) {
+            // Filtrado: si hay lista y no contiene el ataque, saltamos
+            if (movs != null && !movs.contains(attackName)) {
                 continue;
             }
 
-            // Si el Pokémon cumple el criterio de la tarea, incrementamos el progreso
+            // Incrementamos progreso si el Pokémon cumple el criterio
             if (this.checkPokemon(pokemon, task)) {
                 QuestHelper.incrementNumericProgress(pendingTask);
             }
