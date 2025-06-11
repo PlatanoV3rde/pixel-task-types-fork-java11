@@ -52,12 +52,19 @@ public class EvolveTaskType extends PixelmonTaskType {
         String evolutionType = event.getEvolution().evoType;
         Pokemon pokemon = event.getPokemon();
 
+        // Evitar NullPointerException si pokemon es null
+        if (pokemon == null) {
+            PixelTaskTypes.getLogger()
+                .warn("EvolveEvent.Post fired but pokemon is null for player " + player.getName().getString());
+            return;
+        }
+
         List<TaskUtils.PendingTask> pendingTasks = TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this);
-        for (int i = 0; i < pendingTasks.size(); i++) {
-            TaskUtils.PendingTask pendingTask = pendingTasks.get(i);
+        for (TaskUtils.PendingTask pendingTask : pendingTasks) {
             Task task = pendingTask.task();
 
-            List<String> requiredEvolutionTypes = QuestHelper.getConfigStringListAsLowercase(task, "evolution_types");
+            List<String> requiredEvolutionTypes =
+                QuestHelper.getConfigStringListAsLowercase(task, "evolution_types");
             if (requiredEvolutionTypes != null && !requiredEvolutionTypes.contains(evolutionType)) {
                 continue;
             }
