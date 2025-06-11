@@ -17,8 +17,6 @@ import dev.spaxter.pixeltasktypes.util.QuestHelper;
 
 import org.bukkit.entity.Player;
 
-import java.util.List;
-
 /**
  * Defeat Pokémon task type.
  */
@@ -32,38 +30,48 @@ public class DefeatTaskType extends PixelmonTaskType {
     }
 
     /**
-     * Runs when a Pokémon is defeated in a PvP battle.
+     * Runs when a Pokémon is defeated in PvP battle.
      */
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onPokemonDefeat(final PixelmonKnockoutEvent event) {
-        ServerPlayerEntity sourcePlayer = event.source.getPlayerOwner();
-        ServerPlayerEntity opponentPlayer = event.pokemon.getPlayerOwner();
-
-        // Salir si alguno no es un jugador válido
-        if (sourcePlayer == null || opponentPlayer == null) {
+        // Null checks to avoid NPEs
+        if (event == null
+            || event.source == null
+            || event.source.getPlayerOwner() == null
+            || event.pokemon == null
+            || event.pokemon.getPlayerOwner() == null) {
             return;
         }
 
-        Player bukkitPlayer = ArclightUtils.getBukkitPlayer(sourcePlayer.getUUID());
-        QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(sourcePlayer.getUUID());
+        ServerPlayerEntity player = event.source.getPlayerOwner();
 
-        // Evitar crash si no se puede obtener el jugador de Bukkit o de Quests
-        if (bukkitPlayer == null || questPlayer == null) {
+        Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
+        if (bukkitPlayer == null) {
+            this.plugin.getLogger().warning("onPokemonDefeat: Bukkit player is null for UUID " + player.getUUID());
+            return;
+        }
+        QPlayer questPlayer = this.plugin.getQuestsApi()
+                                       .getPlayerManager()
+                                       .getPlayer(player.getUUID());
+        if (questPlayer == null) {
+            this.plugin.getLogger().warning("onPokemonDefeat: QPlayer is null for UUID " + player.getUUID());
             return;
         }
 
         Pokemon pokemon = event.pokemon.pokemon;
+        if (pokemon == null) {
+            this.plugin.getLogger().warning("onPokemonDefeat: defeated Pokémon is null for player "
+                                            + player.getName().getString());
+            return;
+        }
 
-        List<TaskUtils.PendingTask> pendingTasks = TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this);
-        for (int i = 0; i < pendingTasks.size(); i++) {
-            TaskUtils.PendingTask pendingTask = pendingTasks.get(i);
+        for (TaskUtils.PendingTask pendingTask :
+                TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this)) {
             Task task = pendingTask.task();
 
-            // Si la tarea está configurada como "wild_only", saltarla en PvP
             if (TaskUtils.getConfigBoolean(task, "wild_only")) {
                 continue;
             }
-
             if (this.checkPokemon(pokemon, task)) {
                 QuestHelper.incrementNumericProgress(pendingTask);
             }
@@ -71,32 +79,48 @@ public class DefeatTaskType extends PixelmonTaskType {
     }
 
     /**
-     * Runs when a wild Pokémon is defeated in battle.
+     * Runs when a wild Pokémon is defeated.
      */
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onWildPokemonDefeat(final BeatWildPixelmonEvent event) {
+        // Null checks
+        if (event == null
+            || event.player == null
+            || event.wpp == null
+            || event.wpp.getFaintedPokemon() == null
+            || event.wpp.getFaintedPokemon().pokemon == null) {
+            return;
+        }
+
         ServerPlayerEntity player = event.player;
 
         Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
-        QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(player.getUUID());
-
-        // Evitar crash si no se puede obtener el jugador de Bukkit o de Quests
-        if (bukkitPlayer == null || questPlayer == null) {
+        if (bukkitPlayer == null) {
+            this.plugin.getLogger().warning("onWildPokemonDefeat: Bukkit player is null for UUID " + player.getUUID());
+            return;
+        }
+        QPlayer questPlayer = this.plugin.getQuestsApi()
+                                       .getPlayerManager()
+                                       .getPlayer(player.getUUID());
+        if (questPlayer == null) {
+            this.plugin.getLogger().warning("onWildPokemonDefeat: QPlayer is null for UUID " + player.getUUID());
             return;
         }
 
         Pokemon pokemon = event.wpp.getFaintedPokemon().pokemon;
+        if (pokemon == null) {
+            this.plugin.getLogger().warning("onWildPokemonDefeat: defeated wild Pokémon is null for player "
+                                            + player.getName().getString());
+            return;
+        }
 
-        List<TaskUtils.PendingTask> pendingTasks = TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this);
-        for (int i = 0; i < pendingTasks.size(); i++) {
-            TaskUtils.PendingTask pendingTask = pendingTasks.get(i);
+        for (TaskUtils.PendingTask pendingTask :
+                TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this)) {
             Task task = pendingTask.task();
 
-            // Si la tarea está configurada como "pvp_only", saltarla en combates salvajes
             if (TaskUtils.getConfigBoolean(task, "pvp_only")) {
                 continue;
             }
-
             if (this.checkPokemon(pokemon, task)) {
                 QuestHelper.incrementNumericProgress(pendingTask);
             }

@@ -54,8 +54,10 @@ public class EvolveTaskType extends PixelmonTaskType {
 
         // Evitar NullPointerException si pokemon es null
         if (pokemon == null) {
-            PixelTaskTypes.getLogger()
-                .warn("EvolveEvent.Post fired but pokemon is null for player " + player.getName().getString());
+            this.plugin.getLogger().warning(
+                "EvolveEvent.Post fired but pokemon is null for player " +
+                player.getName().getString()
+            );
             return;
         }
 
