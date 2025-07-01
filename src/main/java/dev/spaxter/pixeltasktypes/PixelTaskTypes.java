@@ -3,6 +3,8 @@ package dev.spaxter.pixeltasktypes;
 import com.leonardobishop.quests.bukkit.BukkitQuestsPlugin;
 import com.leonardobishop.quests.common.tasktype.TaskTypeManager;
 import dev.spaxter.pixeltasktypes.tasks.*;
+import dev.spaxter.pixeltasktypes.tasks.RaidCompleteTaskType;
+import dev.spaxter.pixeltasktypes.tasks.RaidCaptureTaskType;
 import dev.spaxter.pixeltasktypes.util.Resources;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -84,6 +86,7 @@ public final class PixelTaskTypes extends JavaPlugin {
         try {
             TaskTypeManager taskTypeManager = this.questsApi.getTaskTypeManager();
             
+            // Tipos de tareas existentes
             taskTypeManager.registerTaskType(new CatchTaskType(this));
             taskTypeManager.registerTaskType(new CleanFossilTaskType(this));
             taskTypeManager.registerTaskType(new DefeatTaskType(this));
@@ -91,6 +94,10 @@ public final class PixelTaskTypes extends JavaPlugin {
             taskTypeManager.registerTaskType(new FishingTaskType(this));
             taskTypeManager.registerTaskType(new HatchEggTaskType(this));
             taskTypeManager.registerTaskType(new MoveTaskType(this));
+
+            // Nuevos tipos de tareas para raids
+            taskTypeManager.registerTaskType(new RaidCompleteTaskType(this));
+            taskTypeManager.registerTaskType(new RaidCaptureTaskType(this));
             
             logger.info("Successfully registered all task types!");
         } catch (Exception e) {
