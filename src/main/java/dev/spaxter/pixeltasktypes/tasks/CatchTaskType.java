@@ -1,27 +1,24 @@
 package dev.spaxter.pixeltasktypes.tasks;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-
 import com.leonardobishop.quests.bukkit.util.TaskUtils;
 import com.leonardobishop.quests.common.player.QPlayer;
 import com.leonardobishop.quests.common.quest.Task;
-import com.pixelmonmod.pixelmon.api.events.CaptureEvent;
-import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
 
 import dev.spaxter.pixeltasktypes.PixelTaskTypes;
+import dev.spaxter.pixeltasktypes.pixelmon.PixelmonIntegrationReflection;
 import dev.spaxter.pixeltasktypes.util.ArclightUtils;
 import dev.spaxter.pixeltasktypes.util.QuestHelper;
 import dev.spaxter.pixeltasktypes.validation.PixelmonTaskConfigValidator;
 import dev.spaxter.pixeltasktypes.validation.ValidationConstants;
 
-import java.util.List;
-
 import org.bukkit.entity.Player;
+
+import java.util.List;
 
 /**
  * Catch Pokémon task type.
+ * 
+ * Esta versión usa PixelmonIntegrationReflection para no depender directamente de Pixelmon.
  */
 public class CatchTaskType extends PixelmonTaskType {
 
@@ -34,40 +31,39 @@ public class CatchTaskType extends PixelmonTaskType {
     }
 
     /**
-     * Runs when a Pokémon is successfully captured.
+     * Registra los listeners de este TaskType en PixelmonIntegrationReflection.
      */
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void onPokemonCatch(final CaptureEvent.SuccessfulCapture event) {
-        final ServerPlayerEntity player = event.getPlayer();
-        final Player bukkitPlayer = ArclightUtils.getBukkitPlayer(player.getUUID());
-        final QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(player.getUUID());
+    @Override
+    public void registerListeners() {
+        PixelmonIntegrationReflection.registerCatchListener((playerUUID, pokemonName, pokeBall) -> {
+            final Player bukkitPlayer = ArclightUtils.getBukkitPlayer(playerUUID);
+            final QPlayer questPlayer = this.plugin.getQuestsApi().getPlayerManager().getPlayer(playerUUID);
 
-        // Evitar crash si no se puede obtener el jugador de Bukkit o de Quests
-        if (bukkitPlayer == null || questPlayer == null) {
-            return;
-        }
-
-        final List<TaskUtils.PendingTask> pendingTasks = TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this);
-
-        // Verificación para evitar NullPointerException
-        if (pendingTasks == null || pendingTasks.isEmpty()) {
-            return;
-        }
-
-        Pokemon pokemon = event.getPokemon().getPokemon();
-        String pokeball = event.getPokeBall().getBallType().getName().toLowerCase();
-
-        for (final TaskUtils.PendingTask pendingTask : pendingTasks) {
-            final Task task = pendingTask.task();
-
-            List<String> requiredPokeballs = QuestHelper.getConfigStringListAsLowercase(task, "poke_balls");
-            if (requiredPokeballs != null && !requiredPokeballs.contains(pokeball)) {
-                continue;
+            // Evitar crash si no se puede obtener el jugador de Bukkit o de Quests
+            if (bukkitPlayer == null || questPlayer == null) {
+                return;
             }
 
-            if (this.checkPokemon(pokemon, task)) {
-                QuestHelper.incrementNumericProgress(pendingTask);
+            final List<TaskUtils.PendingTask> pendingTasks =
+                TaskUtils.getApplicableTasks(bukkitPlayer, questPlayer, this);
+
+            if (pendingTasks == null || pendingTasks.isEmpty()) {
+                return;
             }
-        }
+
+            for (final TaskUtils.PendingTask pendingTask : pendingTasks) {
+                final Task task = pendingTask.task();
+
+                List<String> requiredPokeballs =
+                    QuestHelper.getConfigStringListAsLowercase(task, "poke_balls");
+                if (requiredPokeballs != null && !requiredPokeballs.contains(pokeBall.toLowerCase())) {
+                    continue;
+                }
+
+                if (this.checkPokemon(pokemonName, task)) {
+                    QuestHelper.incrementNumericProgress(pendingTask);
+                }
+            }
+        });
     }
 }

@@ -1,32 +1,41 @@
 package dev.spaxter.pixeltasktypes.pixelmon;
 
 import org.bukkit.plugin.java.JavaPlugin;
+import dev.spaxter.pixeltasktypes.PixelTaskTypes;
 
 /**
- * Aquí pones TODO el código relacionado con Pixelmon, pero usando reflection.
- * No importes com.pixelmon.* en este archivo; usa Class.forName / reflection.
+ * Clase encargada de inicializar la integración Pixelmon via reflection.
+ * - Inicializa PixelmonBridge
+ * - Registra listeners/handlers que traduzcan eventos Pixelmon en llamadas
+ *   accionables para los task types (sin exponer tipos Pixelmon en las firmas)
+ * - Finalmente solicita al Main registrar las task types que dependen de Pixelmon
  */
 public final class PixelmonIntegrationReflection {
     private PixelmonIntegrationReflection() {}
 
     public static void init(JavaPlugin plugin) {
         try {
-            Class<?> pixelmonMain = Class.forName("com.pixelmonmod.pixelmon.Pixelmon");
-            plugin.getLogger().info("[PixelmonIntegrationReflection] Pixelmon encontrada: " + pixelmonMain.getName());
+            // Inicializar bridge (localiza clases Pixelmon via reflection)
+            PixelmonBridge.init(plugin);
 
-            // EJEMPLO: Si necesitas invocar métodos estáticos de Pixelmon:
-            // Method m = pixelmonMain.getMethod("yourStaticMethodName", paramTypes...);
-            // m.invoke(null, args...);
+            if (!PixelmonBridge.isAvailable()) {
+                plugin.getLogger().warning("[PixelmonIntegrationReflection] PixelmonBridge no disponible tras init.");
+                return;
+            }
 
-            // EJEMPLO: Si tienes listeners específicos que importaban Pixelmon,
-            // reescríbelos aquí para que usen reflection o crea listeners que usen
-            // Object en firmas y conviertan con reflection internamente.
+            // TODO: aquí puedes registrar listeners Pixelmon específicos que conviertan
+            // eventos Pixelmon a llamadas sobre tus task types. Ejemplo:
+            // - Registrar un listener que capture el evento "EntityCaught" de Pixelmon,
+            //   extraiga UUID/species/level y llame a una API neutral de tu TaskType.
 
-            plugin.getLogger().info("[PixelmonIntegrationReflection] Integración inicializada via reflection.");
-        } catch (ClassNotFoundException e) {
-            plugin.getLogger().warning("[PixelmonIntegrationReflection] Pixelmon no encontrada (ClassNotFound).");
+            // Registrar task types que dependen de Pixelmon (ahora que bridge está listo)
+            if (plugin instanceof PixelTaskTypes) {
+                ((PixelTaskTypes) plugin).registerPixelmonDependentTaskTypes();
+            }
+
+            plugin.getLogger().info("[PixelmonIntegrationReflection] Pixelmon integration complete.");
         } catch (Throwable t) {
-            plugin.getLogger().warning("[PixelmonIntegrationReflection] Error en integración por reflection: " + t.getMessage());
+            plugin.getLogger().warning("[PixelmonIntegrationReflection] Error inicializando integración: " + t.getMessage());
             t.printStackTrace();
         }
     }

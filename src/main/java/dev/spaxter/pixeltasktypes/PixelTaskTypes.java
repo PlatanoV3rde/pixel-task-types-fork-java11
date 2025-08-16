@@ -12,6 +12,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Main del plugin. Gestiona registro de task types en dos grupos:
+ *  - base (no dependen de Pixelmon) -> se registran siempre si Quests está.
+ *  - pixelmon-dependent -> se registran únicamente cuando Pixelmon está listo.
+ *
+ * También delega integración Pixelmon a PixelmonIntegrationReflection (reflection).
+ */
 public final class PixelTaskTypes extends JavaPlugin {
     public static String ART;
     public static Logger logger;
@@ -43,7 +50,7 @@ public final class PixelTaskTypes extends JavaPlugin {
         // Intentamos inicializar Quests si ya está presente (no aborta si no lo está)
         initQuestsAPI();
 
-        // Intentar registrar TaskTypes ahora (o reintentar cuando Quests se habilite)
+        // Intentar registrar TaskTypes base ahora (si Quests está listo)
         Bukkit.getScheduler().runTask(this, this::attemptRegisterQuests);
 
         // Intentar integración con Pixelmon (si está presente)
@@ -73,9 +80,9 @@ public final class PixelTaskTypes extends JavaPlugin {
                 logger.info("Quests detected and API cached.");
             } else {
                 this.questsApi = null;
-                logger.info("Quests not present (will register task types when available).");
+                logger.info("Quests not present (will register base task types when available).");
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             this.questsApi = null;
             logger.log(Level.WARNING, "Failed to detect Quests plugin at startup (will wait).", e);
         }
@@ -90,11 +97,11 @@ public final class PixelTaskTypes extends JavaPlugin {
     }
 
     /**
-     * Intento seguro de registrar task types. Si Quests no está presente o si
-     * la API lanza IllegalStateException (no es la ventana de registro), se reintenta.
+     * Intenta registrar las task types base (no dependientes de Pixelmon).
+     * Si Quests no está aún, sale y el PluginWatcher reintentará.
      */
     public void attemptRegisterQuests() {
-        // Si no hay instancia cached, intentar obtenerla de nuevo (quitar la referencia stale)
+        // Si no hay instancia cached, intentar obtenerla de nuevo
         if (this.questsApi == null) {
             Plugin p = getServer().getPluginManager().getPlugin("Quests");
             if (p instanceof BukkitQuestsPlugin) {
@@ -107,26 +114,54 @@ public final class PixelTaskTypes extends JavaPlugin {
             return;
         }
 
+        // Registrar únicamente las tasks base (no-Pixelmon)
+        registerBaseTaskTypes();
+    }
+
+    /**
+     * Registra task types que NO dependen de Pixelmon.
+     */
+    public void registerBaseTaskTypes() {
         try {
-            logger.info("[PixelTaskTypes] Registrando TaskTypes con Quests...");
+            if (this.questsApi == null) return;
             TaskTypeManager taskTypeManager = this.questsApi.getTaskTypeManager();
 
-            // Registrar todos los tipos de tareas (usa tus constructores actuales)
+            // Ejemplo: registrar MoveTaskType que no depende de Pixelmon
+            // Ajusta la lista a tus task types neutrales reales
+            taskTypeManager.registerTaskType(new MoveTaskType(this));
+
+            logger.info("[PixelTaskTypes] Registered base (non-Pixelmon) task types.");
+        } catch (Throwable t) {
+            logger.log(Level.SEVERE, "Error registering base task types", t);
+        }
+    }
+
+    /**
+     * Registra las task types que DEPENDEN de Pixelmon.
+     * Este método lo invoca PixelmonIntegrationReflection.init() después de inicializar el bridge.
+     */
+    public void registerPixelmonDependentTaskTypes() {
+        try {
+            if (this.questsApi == null) {
+                logger.warning("[PixelTaskTypes] Quests API missing when trying to register Pixelmon-dependent tasks.");
+                return;
+            }
+            TaskTypeManager taskTypeManager = this.questsApi.getTaskTypeManager();
+
+            // Registrar task types que requieren Pixelmon (ejemplos)
             taskTypeManager.registerTaskType(new CatchTaskType(this));
             taskTypeManager.registerTaskType(new CleanFossilTaskType(this));
             taskTypeManager.registerTaskType(new DefeatTaskType(this));
             taskTypeManager.registerTaskType(new EvolveTaskType(this));
             taskTypeManager.registerTaskType(new FishingTaskType(this));
             taskTypeManager.registerTaskType(new HatchEggTaskType(this));
-            taskTypeManager.registerTaskType(new MoveTaskType(this));
 
-            logger.info("Successfully registered all task types!");
+            logger.info("[PixelTaskTypes] Registered Pixelmon-dependent task types.");
         } catch (IllegalStateException ex) {
-            // Quests puede lanzar IllegalStateException si esta no es la "ventana" de registro
-            logger.warning("[PixelTaskTypes] Fuera de la ventana de registro de Quests; reintentando en el siguiente tick.");
-            Bukkit.getScheduler().runTask(this, this::attemptRegisterQuests);
-        } catch (Throwable e) {
-            logger.log(Level.SEVERE, "Failed to register task types", e);
+            logger.warning("[PixelTaskTypes] Fuera de la ventana de registro; reintentando en el siguiente tick.");
+            Bukkit.getScheduler().runTask(this, this::registerPixelmonDependentTaskTypes);
+        } catch (Throwable t) {
+            logger.log(Level.SEVERE, "Failed to register Pixelmon-dependent task types", t);
         }
     }
 

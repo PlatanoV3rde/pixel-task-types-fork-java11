@@ -22,7 +22,7 @@ public class PluginWatcher implements Listener {
         Plugin p = e.getPlugin();
         String name = p.getName();
         if ("Quests".equalsIgnoreCase(name) || "QuestsPlugin".equalsIgnoreCase(name)) {
-            plugin.getLogger().info("[PixelTaskTypes] Quests habilitado — intentando registrar TaskTypes.");
+            plugin.getLogger().info("[PixelTaskTypes] Quests habilitado — intentando registrar TaskTypes base.");
             Bukkit.getScheduler().runTask(plugin, () -> {
                 if (plugin instanceof PixelTaskTypes) ((PixelTaskTypes) plugin).attemptRegisterQuests();
             });
