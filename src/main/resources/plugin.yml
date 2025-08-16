@@ -3,4 +3,6 @@ version: '${version}'
 main: dev.spaxter.pixeltasktypes.PixelTaskTypes
 api-version: '1.16'
 load: POSTWORLD
-depend: [Quests]
+softdepend:
+  - Quests
+load: POSTWORLD
