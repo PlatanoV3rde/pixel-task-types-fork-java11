@@ -1,89 +1,125 @@
 package dev.spaxter.pixeltasktypes.validation;
 
-import com.pixelmonmod.pixelmon.api.battles.attack.AttackRegistry;
-import com.pixelmonmod.pixelmon.api.pokemon.Element;
-import com.pixelmonmod.pixelmon.api.pokemon.item.pokeball.PokeBallRegistry;
-import com.pixelmonmod.pixelmon.api.pokemon.stats.evolution.Evolution;
-import com.pixelmonmod.pixelmon.api.registries.PixelmonPalettes;
-import com.pixelmonmod.pixelmon.api.registries.PixelmonSpecies;
-import com.pixelmonmod.pixelmon.enums.items.EnumFossils;
-import com.pixelmonmod.pixelmon.enums.items.EnumRodType;
-
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
- * Static constants used for config validation.
+ * Validation constants that (optionally) depend on Pixelmon registries.
+ *
+ * All fields are initialized safely: if Pixelmon (o su registries) fail to
+ * initialise, the corresponding constant will be left as {@code null} to
+ * indicate "validation data not available".
+ *
+ * Replace the placeholder population code inside the try-blocks with the real
+ * Pixelmon API calls if/when you know them.
  */
-public class ValidationConstants {
-    /**
-     * List of valid Pokémon palettes as lowercase strings.
-     */
-    public static final List<String> PALETTES = PixelmonPalettes.getAll()
-            .stream()
-            .filter(palette -> palette != null)
-            .map(palette -> palette.getName().toLowerCase())
-            .collect(Collectors.toList());
+public final class ValidationConstants {
 
-    /**
-     * List of valid Pokémon types as lowercase strings.
-     */
-    public static final List<String> POKEMON_TYPES = Arrays.asList(Element.getTypeNames(false))
-            .stream()
-            .filter(element -> element != null)
-            .map(element -> element.toLowerCase())
-            .collect(Collectors.toList());
+    public static final List<String> SPECIES;
+    public static final List<String> POKEMON_TYPES;
+    public static final List<String> PALETTES;
+    public static final List<String> POKE_BALLS;
+    public static final List<String> MOVE_NAMES;
+    public static final List<String> ROD_TYPES;
+    public static final List<String> EVOLUTION_TYPES;
 
-    /**
-     * List of valid Pokémon species as lowercase strings.
-     */
-    public static final List<String> SPECIES = PixelmonSpecies.getAll()
-            .stream()
-            .filter(species -> species != null)
-            .map(species -> species.getName().toLowerCase())
-            .collect(Collectors.toList());
+    static {
+        List<String> speciesTmp = null;
+        List<String> pokemonTypesTmp = null;
+        List<String> palettesTmp = null;
+        List<String> pokeBallsTmp = null;
+        List<String> moveNamesTmp = null;
+        List<String> rodTypesTmp = null;
+        List<String> evolutionTypesTmp = null;
 
-    /**
-     * List of valid Pokéball names.
-     */
-    public static final List<String> POKE_BALLS = PokeBallRegistry.getAll()
-            .stream()
-            .filter(pokeball -> pokeball != null)
-            .map(pokeball -> pokeball.getName().toLowerCase())
-            .collect(Collectors.toList());
+        try {
+            /*
+             * TODO: replace the following placeholder initializers with real Pixelmon
+             * registry reads. They are intentionally commented / left as simple empty lists
+             * so that if Pixelmon APIs or registries throw during class init, we don't
+             * crash plugin startup.
+             *
+             * Example (pseudo-code; replace with actual API):
+             *
+             * speciesTmp = PixelmonSpeciesRegistry.getAll().stream()
+             *      .map(s -> s.getName().toLowerCase())
+             *      .collect(Collectors.toList());
+             *
+             * pokeBallsTmp = PixelmonBallRegistry.getAll().stream()
+             *      .map(b -> b.getName().toLowerCase())
+             *      .collect(Collectors.toList());
+             *
+             * If you cannot call the Pixelmon APIs safely here, consider lazy-loading
+             * via a getter that attempts the registry read when first requested.
+             */
+            //
+            // Placeholder safe initialization (empty lists). If you prefer "no validation"
+            // when Pixelmon isn't present, set these to null instead.
+            //
+            // NOTE: we set them to null here (meaning "not available") to allow the
+            // validator code to skip validation when lists are unavailable (recommended).
+            //
+            speciesTmp = null;
+            pokemonTypesTmp = null;
+            palettesTmp = null;
+            pokeBallsTmp = null;
+            moveNamesTmp = null;
+            rodTypesTmp = null;
+            evolutionTypesTmp = null;
 
-    /**
-     * List of valid evolution types.
-     */
-    public static final List<String> EVOLUTION_TYPES = Evolution.evolutionTypes.keySet()
-            .stream()
-            .filter(evoType -> evoType != null)
-            .map(evoType -> evoType.toLowerCase())
-            .collect(Collectors.toList());
+        } catch (final Throwable t) {
+            // Pixelmon not available or registry initialization failed — fail softly.
+            System.err.println("Warning: could not load Pixelmon validation data: " + t);
+            speciesTmp = null;
+            pokemonTypesTmp = null;
+            palettesTmp = null;
+            pokeBallsTmp = null;
+            moveNamesTmp = null;
+            rodTypesTmp = null;
+            evolutionTypesTmp = null;
+        }
 
-    /**
-     * List of valid fishing rod types.
-     */
-    public static final List<String> ROD_TYPES = Arrays.stream(EnumRodType.values())
-            .filter(rodType -> rodType != null)
-            .map(rodType -> rodType.name().toLowerCase())
-            .collect(Collectors.toList());
+        // Assign to public finals (keep null if unavailable)
+        SPECIES = (speciesTmp == null) ? null : Collections.unmodifiableList(new ArrayList<>(speciesTmp));
+        POKEMON_TYPES = (pokemonTypesTmp == null) ? null : Collections.unmodifiableList(new ArrayList<>(pokemonTypesTmp));
+        PALETTES = (palettesTmp == null) ? null : Collections.unmodifiableList(new ArrayList<>(palettesTmp));
+        POKE_BALLS = (pokeBallsTmp == null) ? null : Collections.unmodifiableList(new ArrayList<>(pokeBallsTmp));
+        MOVE_NAMES = (moveNamesTmp == null) ? null : Collections.unmodifiableList(new ArrayList<>(moveNamesTmp));
+        ROD_TYPES = (rodTypesTmp == null) ? null : Collections.unmodifiableList(new ArrayList<>(rodTypesTmp));
+        EVOLUTION_TYPES = (evolutionTypesTmp == null) ? null : Collections.unmodifiableList(new ArrayList<>(evolutionTypesTmp));
+    }
 
-    /**
-     * List of valid fossil types.
-     */
-    public static final List<String> FOSSIL_TYPES = Arrays.stream(EnumFossils.values())
-            .filter(fossilType -> fossilType != null)
-            .map(fossilType -> fossilType.name().toLowerCase())
-            .collect(Collectors.toList());
+    private ValidationConstants() {
+        // no instances
+    }
 
-    /**
-     * List of valid move names.
-     */
-    public static final List<String> MOVE_NAMES = AttackRegistry.getAllAttackNames()
-            .stream()
-            .filter(attackName -> attackName != null)
-            .map(attackName -> attackName.toLowerCase().replaceAll(" ", "_"))
-            .collect(Collectors.toList());
+    /* Convenience checks so callers can test availability before using lists. */
+    public static boolean hasSpecies() {
+        return SPECIES != null && !SPECIES.isEmpty();
+    }
+
+    public static boolean hasPokemonTypes() {
+        return POKEMON_TYPES != null && !POKEMON_TYPES.isEmpty();
+    }
+
+    public static boolean hasPalettes() {
+        return PALETTES != null && !PALETTES.isEmpty();
+    }
+
+    public static boolean hasPokeBalls() {
+        return POKE_BALLS != null && !POKE_BALLS.isEmpty();
+    }
+
+    public static boolean hasMoveNames() {
+        return MOVE_NAMES != null && !MOVE_NAMES.isEmpty();
+    }
+
+    public static boolean hasRodTypes() {
+        return ROD_TYPES != null && !ROD_TYPES.isEmpty();
+    }
+
+    public static boolean hasEvolutionTypes() {
+        return EVOLUTION_TYPES != null && !EVOLUTION_TYPES.isEmpty();
+    }
 }

@@ -4,8 +4,10 @@ import com.leonardobishop.quests.bukkit.util.TaskUtils;
 import com.leonardobishop.quests.common.player.questprogressfile.TaskProgress;
 import com.leonardobishop.quests.common.quest.Task;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
+
 import javax.annotation.Nullable;
 
 /**
@@ -20,10 +22,15 @@ public class QuestHelper {
      * @return {@code true} if the quest was completed, otherwise {@code false}
      */
     public static boolean incrementNumericProgress(final TaskUtils.PendingTask pendingTask) {
-        final Task task = pendingTask.task();
-        final TaskProgress progress = pendingTask.taskProgress();
+        Objects.requireNonNull(pendingTask, "pendingTask must not be null");
 
-        int requiredAmount = (int) task.getConfigValue("amount");
+        final Task task = Objects.requireNonNull(pendingTask.task(), "task must not be null");
+        final TaskProgress progress = Objects.requireNonNull(pendingTask.taskProgress(), "taskProgress must not be null");
+
+        final Object amountObj = Objects.requireNonNull(task.getConfigValue("amount"),
+                                                        "task config 'amount' must not be null");
+        final int requiredAmount = (int) amountObj;
+
         int current = TaskUtils.incrementIntegerTaskProgress(progress);
 
         if (current >= requiredAmount) {
@@ -43,15 +50,21 @@ public class QuestHelper {
      */
     @Nullable
     public static List<String> getConfigStringListAsLowercase(final Task task, final String path) {
+        Objects.requireNonNull(task, "task must not be null");
+        Objects.requireNonNull(path, "path must not be null");
+
         final List<String> configList = TaskUtils.getConfigStringList(task, path);
 
         if (configList == null) {
             return null;
         }
 
-        // Modificado para ser compatible con Java 8/11
-        return configList.stream()
-               .map(String::toLowerCase)
-               .collect(Collectors.toList());
+        final List<String> lowered = new ArrayList<>(configList.size());
+        for (final String value : configList) {
+            // Preserve original behavior w.r.t. nulls by explicitly checking and failing early with a clear message
+            lowered.add(Objects.requireNonNull(value, "config list contains null value").toLowerCase());
+        }
+
+        return lowered;
     }
 }

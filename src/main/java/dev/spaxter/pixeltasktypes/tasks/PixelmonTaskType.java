@@ -90,6 +90,45 @@ public abstract class PixelmonTaskType extends BukkitTaskType {
         return true;
     }
 
+    /**
+     * Sobrecarga neutral de checkPokemon que acepta el nombre de la especie como String.
+     * Permite que las clases que NO deben importar Pixelmon (ej. CatchTaskType) comprueben
+     * las restricciones por especie sin depender de tipos de Pixelmon.
+     *
+     * Lógica: si la tarea no define restricciones de "species"/"pokemon"/"pokemons", se acepta cualquier Pokémon.
+     * Si hay una lista, se hace comparación insensible a mayúsculas entre el nombre pasado y los elementos de la lista.
+     *
+     * @param pokemonName nombre/especie del Pokémon (ej. "pikachu").
+     * @param task        la tarea con su configuración.
+     * @return true si cumple, false si no.
+     */
+    protected boolean checkPokemon(final String pokemonName, final Task task) {
+        if (pokemonName == null || pokemonName.isEmpty()) return false;
+
+        List<String> configSpecies = QuestHelper.getConfigStringListAsLowercase(task, "species");
+        if (configSpecies == null || configSpecies.isEmpty()) {
+            configSpecies = QuestHelper.getConfigStringListAsLowercase(task, "pokemon");
+        }
+        if (configSpecies == null || configSpecies.isEmpty()) {
+            configSpecies = QuestHelper.getConfigStringListAsLowercase(task, "pokemons");
+        }
+
+        // Si no hay restricción de especie en la config -> aceptar cualquier Pokémon
+        if (configSpecies == null || configSpecies.isEmpty()) {
+            return true;
+        }
+
+        final String lowerName = pokemonName.toLowerCase();
+        for (String allowed : configSpecies) {
+            if (allowed == null) continue;
+            final String allowedLower = allowed.toLowerCase();
+            if (allowedLower.equals(lowerName)) return true;
+            // Si quieres coincidencias parciales (ej. 'pika' mata 'pikachu') descomenta:
+            // if (lowerName.contains(allowedLower)) return true;
+        }
+        return false;
+    }
+
     private boolean checkType(final Pokemon pokemon, final List<String> requiredTypes) {
         List<String> types = new ArrayList<>();
         for (Object typeObj : pokemon.getForm().getTypes()) {
