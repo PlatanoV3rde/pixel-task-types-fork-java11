@@ -28,10 +28,12 @@ public abstract class PixelmonTaskType extends BukkitTaskType {
         super(name, "PixelTaskTypes", description);
         this.plugin = plugin;
         this.questsApi = this.plugin.getQuestsApi();
-        // Registrar los eventos de Pixelmon
-        Arclight.registerForgeEvent(null, Pixelmon.EVENT_BUS, this);
 
-        // Validadores comunes
+        // IMPORTANT: do NOT register Pixelmon event handlers here (constructor),
+        // because that may trigger Pixelmon class initialization too early.
+        // Arclight.registerForgeEvent(null, Pixelmon.EVENT_BUS, this);
+
+        // Validadores comunes (ValidationConstants may be null; validators handle it)
         super.addConfigValidator(
             PixelmonTaskConfigValidator.useStringListValidator(ValidationConstants.SPECIES, this, "species")
         );
@@ -49,12 +51,21 @@ public abstract class PixelmonTaskType extends BukkitTaskType {
     }
 
     /**
-     * Comprueba si un Pokémon cumple los requisitos de configuración de la tarea.
-     *
-     * @param pokemon El Pokémon a comprobar.
-     * @param task    La tarea con su configuración.
-     * @return {@code true} si cumple todos los filtros; {@code false} en caso contrario.
+     * Register integration with Pixelmon/Arclight. Call ONLY when Pixelmon is
+     * initialized (e.g. from a deferred task after server start).
      */
+    public void registerPixelmonIntegration() {
+        try {
+            // Register event handlers on Pixelmon's event bus now that Pixelmon should be ready
+            Arclight.registerForgeEvent(null, Pixelmon.EVENT_BUS, this);
+        } catch (final Throwable t) {
+            // Do not rethrow — log and continue. Integration is best-effort.
+            plugin.getLogger().warning("Failed to register Pixelmon event handlers for " + this.getClass().getSimpleName() + ": " + t);
+        }
+    }
+
+    // --- rest of your original logic, unchanged ---
+
     public boolean checkPokemon(final Pokemon pokemon, final Task task) {
         final List<String> requiredTypes   = QuestHelper.getConfigStringListAsLowercase(task, "pokemon_types");
         final List<String> requiredSpecies = QuestHelper.getConfigStringListAsLowercase(task, "species");
@@ -90,18 +101,6 @@ public abstract class PixelmonTaskType extends BukkitTaskType {
         return true;
     }
 
-    /**
-     * Sobrecarga neutral de checkPokemon que acepta el nombre de la especie como String.
-     * Permite que las clases que NO deben importar Pixelmon (ej. CatchTaskType) comprueben
-     * las restricciones por especie sin depender de tipos de Pixelmon.
-     *
-     * Lógica: si la tarea no define restricciones de "species"/"pokemon"/"pokemons", se acepta cualquier Pokémon.
-     * Si hay una lista, se hace comparación insensible a mayúsculas entre el nombre pasado y los elementos de la lista.
-     *
-     * @param pokemonName nombre/especie del Pokémon (ej. "pikachu").
-     * @param task        la tarea con su configuración.
-     * @return true si cumple, false si no.
-     */
     protected boolean checkPokemon(final String pokemonName, final Task task) {
         if (pokemonName == null || pokemonName.isEmpty()) return false;
 
