@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -80,16 +81,24 @@ public final class PixelTaskTypes extends JavaPlugin {
         this.registerEvents();
 
         // *** Luego, de forma diferida, intentar la integración con Pixelmon/Arclight ***
-        this.getServer().getScheduler().runTaskLater(this, () -> {
-            try {
-                // Intentamos inicializar Pixelmon (ejecuta <clinit> si está presente)
+        // No forzamos la inicialización estática de Pixelmon; hacemos detección sin ejecutar <clinit>
+        final org.bukkit.plugin.Plugin pluginInstance = this;
+
+        // Runnable que intentará registrar la integración con Pixelmon
+        final Runnable tryRegister = new Runnable() {
+            private int attempts = 0;
+
+            @Override
+            public void run() {
+                attempts++;
                 try {
-                    Class.forName("com.pixelmonmod.pixelmon.Pixelmon", true, getClassLoader());
+                    // Detectamos Pixelmon sin forzar su <clinit>
+                    Class.forName("com.pixelmonmod.pixelmon.Pixelmon", false, getClassLoader());
                 } catch (ClassNotFoundException e) {
-                    logger.warning("Pixelmon is not present (or failed to initialize). PixelTaskTypes will skip Pixelmon integrations.");
+                    pluginInstance.getLogger().warning("Pixelmon is not present; skipping Pixelmon integrations.");
                     return;
                 } catch (Throwable t) {
-                    logger.warning("Unexpected error while initializing Pixelmon: " + t);
+                    pluginInstance.getLogger().warning("Unexpected error while detecting Pixelmon: " + t);
                     return;
                 }
 
@@ -98,14 +107,19 @@ public final class PixelTaskTypes extends JavaPlugin {
                     try {
                         t.registerPixelmonIntegration();
                     } catch (Throwable tt) {
-                        logger.warning("Failed to register Pixelmon integration for task: " + t.getClass().getSimpleName() + " -> " + tt);
+                        pluginInstance.getLogger().warning("Failed to register Pixelmon integration for task: "
+                                + t.getClass().getSimpleName() + " (attempt " + attempts + "): " + tt);
                     }
                 }
-                logger.info("PixelTaskTypes: Pixelmon integration attempts finished.");
-            } catch (final Throwable e) {
-                logger.log(java.util.logging.Level.SEVERE, "Deferred Pixelmon integration failed", e);
+
+                pluginInstance.getLogger().info("PixelTaskTypes: Pixelmon integration attempts finished.");
             }
-        }, 20L);
+        };
+
+        // Primer intento inmediato (en el tick actual) y dos reintentos espaciados
+        Bukkit.getScheduler().runTask(pluginInstance, tryRegister);
+        Bukkit.getScheduler().runTaskLater(pluginInstance, tryRegister, 20L); // +1s
+        Bukkit.getScheduler().runTaskLater(pluginInstance, tryRegister, 60L); // +3s
     }
 
     private void registerEvents() {
