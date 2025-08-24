@@ -3,16 +3,6 @@ package dev.spaxter.pixeltasktypes;
 import com.leonardobishop.quests.bukkit.BukkitQuestsPlugin;
 import com.leonardobishop.quests.common.tasktype.TaskTypeManager;
 
-import dev.spaxter.pixeltasktypes.tasks.CatchTaskType;
-import dev.spaxter.pixeltasktypes.tasks.CleanFossilTaskType;
-import dev.spaxter.pixeltasktypes.tasks.DefeatTaskType;
-import dev.spaxter.pixeltasktypes.tasks.EvolveTaskType;
-import dev.spaxter.pixeltasktypes.tasks.FishingTaskType;
-import dev.spaxter.pixeltasktypes.tasks.HatchEggTaskType;
-import dev.spaxter.pixeltasktypes.tasks.MoveTaskType;
-import dev.spaxter.pixeltasktypes.util.Resources;
-import dev.spaxter.pixeltasktypes.tasks.PixelmonTaskType;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -22,69 +12,55 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
- * Pixel Task Types main class.
- *
- * @author Spaxter
+ * Pixel Task Types main class — versión segura para evitar linking prematuro a Pixelmon.
  */
 public final class PixelTaskTypes extends JavaPlugin {
     public static String ART;
     public static Logger logger;
+    public static PixelTaskTypes plugin;
 
     private BukkitQuestsPlugin questsApi;
 
-    // Lista para almacenar las instancias de task types que requieren integración Pixelmon
-    private final List<PixelmonTaskType> pixelmonTaskTypes = new ArrayList<>();
+    /**
+     * Lista para almacenar instancias de task types que requieren integración con Pixelmon.
+     * Las instancias se mantienen como Object para evitar vincular tipos de Pixelmon en tiempo de compilación.
+     */
+    private final List<Object> pixelmonTaskTypes = new ArrayList<>();
 
     @Override
     public void onEnable() {
         logger = this.getLogger();
+        plugin = this;
 
-        try {
-            if (this.getResource("art.txt") != null) {
-                PixelTaskTypes.ART = Resources.readAsString(this.getResource("art.txt"));
-            } else {
-                PixelTaskTypes.ART = "";
-                logger.warning("art.txt resource not found");
-            }
-        } catch (final Exception ex) {
-            PixelTaskTypes.ART = "";
-            logger.warning("Failed to load art.txt: " + ex.getMessage());
-        }
-
-        if (!this.checkArclight()) {
-            logger.warning(
-                "This server does not seem to be running Arclight Forge. PixelTaskTypes will most likely not work.");
-        }
-        if (!this.checkPixelmon()) {
-            logger.warning(
-                "This server does not seem to have the Pixelmon Mod installed. PixelTaskTypes will not work without it.");
-        }
-
-        this.getLogger().info("\n" + (PixelTaskTypes.ART == null ? "" : PixelTaskTypes.ART));
-
-        final Object plugin = this.getServer() == null ? null : this.getServer().getPluginManager() == null
-            ? null
-            : this.getServer().getPluginManager().getPlugin("Quests");
-
-        if (plugin instanceof BukkitQuestsPlugin) {
-            this.questsApi = (BukkitQuestsPlugin) plugin;
+        // Detect presence of Arclight/Pixelmon early for logging (avoids IDE 'unused' warnings)
+        if (checkArclight()) {
+            logger.info("Arclight / Forge environment detected.");
         } else {
-            this.questsApi = null;
+            logger.info("No Arclight / Forge environment detected.");
         }
 
-        if (this.questsApi == null) {
-            logger.warning("Quests plugin not found or not a BukkitQuestsPlugin. PixelTaskTypes will not register task types.");
-            return;
+        if (checkPixelmon()) {
+            logger.info("Pixelmon appears to be present at startup (note: this does not guarantee full initialization).");
+        } else {
+            logger.info("Pixelmon not present at startup.");
         }
 
-        // *** Registrar task types INMEDIATAMENTE (antes de que Quests cierre registros) ***
+        // Intenta obtener la API de Quests (si está presente)
+        try {
+            final org.bukkit.plugin.Plugin raw = Bukkit.getPluginManager().getPlugin("Quests");
+            if (raw instanceof BukkitQuestsPlugin) {
+                this.questsApi = (BukkitQuestsPlugin) raw;
+            } else {
+                this.getLogger().warning("BukkitQuestsPlugin not found or not instance of BukkitQuestsPlugin.");
+            }
+        } catch (Throwable t) {
+            this.getLogger().warning("Error while fetching Quests plugin: " + t);
+        }
+
+        // Registrar eventos / tipos (no dependientes de Pixelmon)
         this.registerEvents();
 
-        // *** Luego, de forma diferida, intentar la integración con Pixelmon/Arclight ***
-        // No forzamos la inicialización estática de Pixelmon; hacemos detección sin ejecutar <clinit>
-        final org.bukkit.plugin.Plugin pluginInstance = this;
-
-        // Runnable que intentará registrar la integración con Pixelmon
+        // Runnable que intentará registrar integraciones de Pixelmon después (si Pixelmon está presente)
         final Runnable tryRegister = new Runnable() {
             private int attempts = 0;
 
@@ -92,70 +68,77 @@ public final class PixelTaskTypes extends JavaPlugin {
             public void run() {
                 attempts++;
                 try {
-                    // Detectamos Pixelmon sin forzar su <clinit>
+                    // Detectamos Pixelmon sin forzar su inicializador (<clinit>)
                     Class.forName("com.pixelmonmod.pixelmon.Pixelmon", false, getClassLoader());
                 } catch (ClassNotFoundException e) {
-                    pluginInstance.getLogger().warning("Pixelmon is not present; skipping Pixelmon integrations.");
+                    plugin.getLogger().warning("Pixelmon is not present (attempt " + attempts + "); skipping Pixelmon integrations.");
                     return;
                 } catch (Throwable t) {
-                    pluginInstance.getLogger().warning("Unexpected error while detecting Pixelmon: " + t);
+                    plugin.getLogger().warning("Unexpected error while detecting Pixelmon (attempt " + attempts + "): " + t);
                     return;
                 }
 
-                // Llamar al hook de integración en cada task type guardado
-                for (PixelmonTaskType t : pixelmonTaskTypes) {
+                // Llamar al hook de integración en cada task type guardado (método opcional por reflexión)
+                for (Object t : pixelmonTaskTypes) {
                     try {
-                        t.registerPixelmonIntegration();
+                        java.lang.reflect.Method hook = t.getClass().getMethod("registerPixelmonIntegration");
+                        hook.invoke(t);
+                    } catch (NoSuchMethodException ns) {
+                        // No todas las tareas implementan el hook: ignorar.
                     } catch (Throwable tt) {
-                        pluginInstance.getLogger().warning("Failed to register Pixelmon integration for task: "
-                                + t.getClass().getSimpleName() + " (attempt " + attempts + "): " + tt);
+                        plugin.getLogger().warning("Failed to register Pixelmon integration for task: " + t.getClass().getName() + " -> " + tt);
                     }
                 }
 
-                pluginInstance.getLogger().info("PixelTaskTypes: Pixelmon integration attempts finished.");
+                plugin.getLogger().info("PixelTaskTypes: Pixelmon integration attempts finished.");
             }
         };
 
-        // Primer intento inmediato (en el tick actual) y dos reintentos espaciados
-        Bukkit.getScheduler().runTask(pluginInstance, tryRegister);
-        Bukkit.getScheduler().runTaskLater(pluginInstance, tryRegister, 20L); // +1s
-        Bukkit.getScheduler().runTaskLater(pluginInstance, tryRegister, 60L); // +3s
+        // Programamos el intento inmediato y dos reintentos espaciados (usa 'plugin' que es JavaPlugin)
+        Bukkit.getScheduler().runTask(plugin, tryRegister);
+        Bukkit.getScheduler().runTaskLater(plugin, tryRegister, 20L); // +1s
+        Bukkit.getScheduler().runTaskLater(plugin, tryRegister, 60L); // +3s
     }
 
+    /**
+     * Registra los task types. Para evitar enlazar Pixelmon en el arranque, usamos reflexión.
+     */
     private void registerEvents() {
         Objects.requireNonNull(this.questsApi, "questsApi must not be null");
 
-        final TaskTypeManager taskTypeManager = Objects.requireNonNull(this.questsApi.getTaskTypeManager(),
-            "TaskTypeManager must not be null");
+        final TaskTypeManager taskTypeManager = Objects.requireNonNull(
+                this.questsApi.getTaskTypeManager(),
+                "TaskTypeManager must not be null"
+        );
 
-        // Crea las instancias y almacenalas en la lista ANTES de registrar
-        CatchTaskType catchTask = new CatchTaskType(this);
-        pixelmonTaskTypes.add(catchTask);
-        taskTypeManager.registerTaskType(catchTask);
+        // Lista de clases FQCN que implementan task types dependientes de Pixelmon
+        final String[] taskClassNames = new String[] {
+                "dev.spaxter.pixeltasktypes.tasks.CatchTaskType",
+                "dev.spaxter.pixeltasktypes.tasks.CleanFossilTaskType",
+                "dev.spaxter.pixeltasktypes.tasks.DefeatTaskType",
+                "dev.spaxter.pixeltasktypes.tasks.EvolveTaskType",
+                "dev.spaxter.pixeltasktypes.tasks.FishingTaskType",
+                "dev.spaxter.pixeltasktypes.tasks.HatchEggTaskType",
+                "dev.spaxter.pixeltasktypes.tasks.MoveTaskType"
+        };
 
-        CleanFossilTaskType clean = new CleanFossilTaskType(this);
-        pixelmonTaskTypes.add(clean);
-        taskTypeManager.registerTaskType(clean);
-
-        DefeatTaskType defeat = new DefeatTaskType(this);
-        pixelmonTaskTypes.add(defeat);
-        taskTypeManager.registerTaskType(defeat);
-
-        EvolveTaskType evolve = new EvolveTaskType(this);
-        pixelmonTaskTypes.add(evolve);
-        taskTypeManager.registerTaskType(evolve);
-
-        FishingTaskType fishing = new FishingTaskType(this);
-        pixelmonTaskTypes.add(fishing);
-        taskTypeManager.registerTaskType(fishing);
-
-        HatchEggTaskType hatch = new HatchEggTaskType(this);
-        pixelmonTaskTypes.add(hatch);
-        taskTypeManager.registerTaskType(hatch);
-
-        MoveTaskType move = new MoveTaskType(this);
-        pixelmonTaskTypes.add(move);
-        taskTypeManager.registerTaskType(move);
+        for (final String clsName : taskClassNames) {
+            try {
+                // Carga la clase sin ejecutar su <clinit>
+                final Class<?> cls = Class.forName(clsName, false, getClassLoader());
+                final java.lang.reflect.Constructor<?> ctor = cls.getConstructor(PixelTaskTypes.class);
+                final Object instance = ctor.newInstance(this);
+                // Guardar la instancia para posteriores integraciones con Pixelmon
+                this.pixelmonTaskTypes.add(instance);
+                // Registrar en TaskTypeManager — casteamos a la clase de Quests que se usa en tiempo de ejecución
+                taskTypeManager.registerTaskType((com.leonardobishop.quests.bukkit.tasktype.BukkitTaskType) instance);
+            } catch (ClassNotFoundException cnf) {
+                logger.info("Task class not present (skipping): " + clsName);
+            } catch (Throwable t) {
+                logger.warning("Failed to register task type: " + clsName + " -> " + t);
+            }
+        }
+        // Fin de registro de tasks.
     }
 
     public BukkitQuestsPlugin getQuestsApi() {
@@ -178,5 +161,9 @@ public final class PixelTaskTypes extends JavaPlugin {
         } catch (ClassNotFoundException e) {
             return false;
         }
+    }
+
+    public static PixelTaskTypes getInstance() {
+        return plugin;
     }
 }
